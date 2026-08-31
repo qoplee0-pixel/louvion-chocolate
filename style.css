@@ -507,13 +507,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
   color: var(--cocoa-900);
 }
 
+/* Arabic product name. No letter-spacing or uppercase — both break
+   Arabic letterforms, which join. */
 .choc-card__family {
-  font-size: 10px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
+  font-size: 15px;
   color: var(--gold);
   margin-top: 5px;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.picker-card__ar {
+  font-size: 13px;
+  color: var(--gold);
+  line-height: 1.7;
+  margin-top: 2px;
 }
 
 .choc-card__desc {

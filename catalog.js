@@ -5,6 +5,9 @@
    (require('./catalog.js')) so prices can never drift between the two.
    The server ALWAYS re-prices orders from this file; the browser only
    ever renders it. Never trust a price sent by a client.
+
+   Product names, Arabic names and shell colours are taken from the
+   Louvion brand sheets. PRICES ARE STILL ESTIMATES — see BOXES.
    ═══════════════════════════════════════════════════════════════════ */
 (function (root, factory) {
   var data = factory();
@@ -13,143 +16,174 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
+  /* ═══ BRAND ═══ */
+  var BRAND = {
+    name: 'Louvion Chocolate',
+    tagline: 'Art you can taste',
+    country: 'Jordan',
+    madeIn: 'Proudly made in Jordan',
+    phones: ['0797978409', '0790916217'],
+    instagram: 'louvionchocolate'
+  };
+
   /* ═══ CURRENCY ═══
-     Change these two lines to switch currency across the whole site. */
-  var CURRENCY = { code: 'USD', symbol: '$' };
+     Jordanian dinar. Change these two lines to switch currency. */
+  var CURRENCY = { code: 'JOD', symbol: 'JD ', decimals: 2 };
 
   /* ═══ BOXES ═══
      `pieces` is enforced server-side: an order is rejected unless the
-     chosen chocolates add up to exactly this count. */
+     chosen chocolates add up to exactly this count.
+
+     ⚠ PRICES ARE PLACEHOLDERS. They are plausible for the Jordanian
+     market but they are not Louvion's real prices. Replace the `price`
+     values (integer fils — 1 JD = 1000, but stored here as hundredths
+     to keep one currency format) before taking a real order. */
   var BOXES = [
     {
       id: 'box-3',
-      name: 'La Petite',
+      name: 'The Trio',
+      nameAr: 'علبة ٣ حبات',
       pieces: 3,
-      price: 1200,
-      tag: 'The little gesture',
-      desc: 'Three bonbons in a slim ribboned sleeve. Made for a thank-you, a hello, or a quiet afternoon.'
+      price: 300,
+      tag: 'A small hello',
+      desc: 'Three pieces in a ribboned sleeve. For a thank-you, or for keeping to yourself.'
     },
     {
       id: 'box-9',
-      name: 'La Classique',
+      name: 'The Classic',
+      nameAr: 'علبة ٩ حبات',
       pieces: 9,
-      price: 3200,
+      price: 850,
       tag: 'Most loved',
-      desc: 'Our everyday box. Nine pieces, three by three, in the signature cocoa-brown case.'
+      desc: 'Nine pieces, three by three, in the gold-lined tray with a window lid.'
     },
     {
       id: 'box-16',
-      name: 'La Signature',
+      name: 'The Signature',
+      nameAr: 'علبة ١٦ حبة',
       pieces: 16,
-      price: 5400,
+      price: 1500,
       tag: 'For gifting',
-      desc: 'Sixteen bonbons laid in a gold-lined tray, finished with a hand-tied ribbon.'
+      desc: 'Sixteen pieces laid in a gold tray and finished with a hand-tied ribbon.'
     },
     {
       id: 'box-64',
-      name: 'La Grande',
+      name: 'The Grand',
+      nameAr: 'علبة ٦٤ حبة',
       pieces: 64,
-      price: 19500,
+      price: 5500,
       tag: 'Celebrations',
-      desc: 'Four trays, sixty-four pieces. Weddings, offices, and the households that mean it.'
+      desc: 'Four trays, sixty-four pieces. Weddings, offices, and occasions that matter.'
     }
   ];
 
   /* ═══ CHOCOLATES ═══
-     `shape` + `base` + `accent` + `finish` drive the hand-drawn SVG in
-     app.js — there are no photo files to manage and nothing loads from
-     a third-party server. */
+     The thirteen bonbons from the Louvion range. `base` / `accent` /
+     `finish` are taken from how each piece actually looks — they drive
+     the hand-drawn SVG in app.js, so there are no photo files to manage
+     and nothing loads from a third-party server.
+
+     finish: 'speckle' gold flecks · 'marble' swirled shell
+             'drizzle' piped lines · 'plain' polished shell */
   var CHOCOLATES = [
     {
-      id: 'noir-70',
-      name: 'Noir 70%',
-      family: 'dark',
-      desc: 'Single-origin Madagascan ganache, bittersweet and clean.',
-      shape: 'dome', base: '#3a2318', accent: '#d9a441', finish: 'gold'
+      id: 'nutella-hazelnut',
+      name: 'Nutella & Hazelnut',
+      nameAr: 'نوتيلا بالبندق',
+      desc: 'Nutella and roasted hazelnut in a dark shell.',
+      base: '#6d2b56', accent: '#d4af37', finish: 'speckle'
     },
     {
-      id: 'caramel-sel',
-      name: 'Salted Caramel',
-      family: 'milk',
-      desc: 'Slow-cooked caramel, Guérande salt, milk chocolate shell.',
-      shape: 'square', base: '#6b4326', accent: '#e8c07d', finish: 'drizzle'
+      id: 'pistachio-kunafa',
+      name: 'Pistachio Kunafa',
+      nameAr: 'بستاشيو كنافة',
+      desc: 'Pistachio cream with crisp kunafa through it.',
+      base: '#6f7a2e', accent: '#d4af37', finish: 'speckle'
     },
     {
-      id: 'pistache',
-      name: 'Pistachio Praliné',
-      family: 'milk',
-      desc: 'Sicilian pistachios ground to a praliné, barely sweet.',
-      shape: 'round', base: '#5c3a22', accent: '#8fae52', finish: 'nut'
+      id: 'blueberry',
+      name: 'Blueberry',
+      nameAr: 'بلوبيري',
+      desc: 'Sharp blueberry against milk chocolate.',
+      base: '#2f6fb5', accent: '#8fc0ea', finish: 'marble'
     },
     {
-      id: 'gianduja',
-      name: 'Hazelnut Gianduja',
-      family: 'milk',
-      desc: 'Piedmont hazelnuts folded into milk chocolate until silk.',
-      shape: 'oval', base: '#6f4527', accent: '#c89b62', finish: 'plain'
+      id: 'pecan',
+      name: 'Pecan',
+      nameAr: 'بيكان',
+      desc: 'Caramelised pecan in a milk chocolate shell.',
+      base: '#5c3a1e', accent: '#e0a53c', finish: 'drizzle'
     },
     {
-      id: 'framboise',
-      name: 'Raspberry Noir',
-      family: 'dark',
-      desc: 'Fresh raspberry pulp against a 64% dark ganache.',
-      shape: 'square', base: '#3f2419', accent: '#b2385a', finish: 'drizzle'
+      id: 'raspberry',
+      name: 'Raspberry',
+      nameAr: 'رازبيري',
+      desc: 'Raspberry pulp, bright and clean.',
+      base: '#b5537a', accent: '#efa8c2', finish: 'marble'
     },
     {
-      id: 'espresso',
-      name: 'Espresso Truffle',
-      family: 'dark',
-      desc: 'Double-shot ganache rolled in bitter cocoa powder.',
-      shape: 'round', base: '#42291b', accent: '#7a5c47', finish: 'dust'
+      id: 'strawberry',
+      name: 'Strawberry',
+      nameAr: 'فراولة',
+      desc: 'Strawberry cream in a deep berry shell.',
+      base: '#7a2148', accent: '#d94f6e', finish: 'marble'
     },
     {
-      id: 'feuilletine',
-      name: 'Praliné Feuilletine',
-      family: 'milk',
-      desc: 'Almond praliné with crushed feuilletine for the snap.',
-      shape: 'bar', base: '#6a4225', accent: '#d8b276', finish: 'shard'
+      id: 'cheesecake',
+      name: 'Cheesecake',
+      nameAr: 'تشيزكيك',
+      desc: 'Baked cheesecake and berry, in one piece.',
+      base: '#d18aa4', accent: '#f6d7e1', finish: 'marble'
     },
     {
-      id: 'passion',
-      name: 'Passionfruit Caramel',
-      family: 'milk',
-      desc: 'Sharp passionfruit cutting through a soft butter caramel.',
-      shape: 'round', base: '#6d4728', accent: '#e2a72e', finish: 'drizzle'
+      id: 'raffaello',
+      name: 'Raffaello',
+      nameAr: 'رفايللو',
+      desc: 'Coconut and almond in white chocolate.',
+      base: '#3f6bb0', accent: '#ffffff', finish: 'marble'
     },
     {
-      id: 'coco',
-      name: 'Coconut & Milk',
-      family: 'white',
-      desc: 'Toasted coconut in a white chocolate and vanilla ganache.',
-      shape: 'dome', base: '#d8c3a1', accent: '#f3e7d2', finish: 'shard'
+      id: 'pistachio',
+      name: 'Pistachio',
+      nameAr: 'بستاشيو',
+      desc: 'Pure pistachio praline, barely sweet.',
+      base: '#5f7f3a', accent: '#a8c473', finish: 'marble'
     },
     {
-      id: 'amande',
-      name: 'Almond Rocher',
-      family: 'dark',
-      desc: 'Caramelised almond slivers set in dark chocolate.',
-      shape: 'round', base: '#3d2519', accent: '#c9a06a', finish: 'nut'
+      id: 'bueno',
+      name: 'Bueno',
+      nameAr: 'بوينو',
+      desc: 'Hazelnut cream and wafer, in a dark shell.',
+      base: '#1e2547', accent: '#c9a227', finish: 'speckle'
     },
     {
-      id: 'orange',
-      name: 'Orange Blossom',
-      family: 'dark',
-      desc: 'Candied Valencia peel and orange blossom water, 70%.',
-      shape: 'square', base: '#3a2317', accent: '#df8b3c', finish: 'drizzle'
+      id: 'pomegranate',
+      name: 'Pomegranate',
+      nameAr: 'رمان',
+      desc: 'Pomegranate, tart against the chocolate.',
+      base: '#8c1f2f', accent: '#d1495b', finish: 'marble'
     },
     {
-      id: 'tonka',
-      name: 'Tonka Vanilla',
-      family: 'white',
-      desc: 'Tonka bean and Tahitian vanilla in white chocolate.',
-      shape: 'oval', base: '#e0cdab', accent: '#a8834f', finish: 'dust'
+      id: 'italian',
+      name: 'Italian Filling',
+      nameAr: 'حشوة ايطالية',
+      desc: 'Hazelnut and chocolate, the Italian way.',
+      base: '#c9663a', accent: '#f0a868', finish: 'marble'
+    },
+    {
+      id: 'nuts',
+      name: 'Mixed Nuts',
+      nameAr: 'مكسرات',
+      desc: 'Almond, cashew and walnut in milk chocolate.',
+      base: '#4a2d1c', accent: '#e8d9b8', finish: 'plain'
     }
   ];
 
   /* ═══ DELIVERY ═══
      Shared so the basket total the customer sees and the total the
-     server charges can never disagree. */
-  var SHIPPING = { flat: 600, freeOver: 8000 };
+     server charges can never disagree. Also a placeholder — set these
+     to Louvion's real delivery terms. */
+  var SHIPPING = { flat: 200, freeOver: 3000 };
 
   var ORDER_STATUSES = ['pending', 'confirmed', 'making', 'shipped', 'completed', 'cancelled'];
 
@@ -163,12 +197,13 @@
     return null;
   }
 
-  /* Prices are integer cents everywhere. Only formatted for display. */
+  /* Prices are integer hundredths everywhere. Only formatted for display. */
   function formatPrice(cents) {
-    return CURRENCY.symbol + (cents / 100).toFixed(2);
+    return CURRENCY.symbol + (cents / 100).toFixed(CURRENCY.decimals);
   }
 
   return {
+    BRAND: BRAND,
     CURRENCY: CURRENCY,
     BOXES: BOXES,
     CHOCOLATES: CHOCOLATES,

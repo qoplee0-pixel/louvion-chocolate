@@ -121,92 +121,78 @@
      third party and the pieces stay crisp at any size. Colours come from
      the catalogue entry, so a new flavour needs no new asset. */
 
+  var DOME = 'M17 73 C17 38 30 21 50 21 C70 21 83 38 83 73 Z';
+
   function chocolateSVG(c) {
-    var light = shade(c.base, 0.24);
-    var dark = shade(c.base, -0.28);
+    var light = shade(c.base, 0.32);
+    var dark = shade(c.base, -0.38);
     var gid = 'cg-' + c.id;
+    var clip = 'cc-' + c.id;
 
     var defs =
-      '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0.35" y2="1">' +
+      '<defs>' +
+      '<linearGradient id="' + gid + '" x1="0.18" y1="0" x2="0.62" y2="1">' +
       '<stop offset="0" stop-color="' + light + '"/>' +
-      '<stop offset="0.55" stop-color="' + c.base + '"/>' +
+      '<stop offset="0.5" stop-color="' + c.base + '"/>' +
       '<stop offset="1" stop-color="' + dark + '"/>' +
-      '</linearGradient></defs>';
+      '</linearGradient>' +
+      '<clipPath id="' + clip + '"><path d="' + DOME + '"/></clipPath>' +
+      '</defs>';
 
-    var fill = 'url(#' + gid + ')';
-    var body = '';
-
-    if (c.shape === 'dome') {
-      body =
-        '<ellipse cx="50" cy="73" rx="33" ry="8" fill="' + dark + '"/>' +
-        '<path d="M17 73 C17 38 30 22 50 22 C70 22 83 38 83 73 Z" fill="' + fill + '"/>' +
-        '<ellipse cx="38" cy="41" rx="9" ry="5" fill="#ffffff" opacity="0.22" transform="rotate(-30 38 41)"/>';
-    } else if (c.shape === 'round') {
-      body =
-        '<ellipse cx="50" cy="80" rx="27" ry="5" fill="' + dark + '" opacity="0.45"/>' +
-        '<circle cx="50" cy="51" r="30" fill="' + fill + '"/>' +
-        '<ellipse cx="39" cy="39" rx="9" ry="5.5" fill="#ffffff" opacity="0.2" transform="rotate(-30 39 39)"/>';
-    } else if (c.shape === 'square') {
-      body =
-        '<rect x="18" y="27" width="64" height="50" rx="6" fill="' + fill + '"/>' +
-        '<rect x="26" y="34" width="48" height="18" rx="3" fill="' + light + '" opacity="0.28"/>' +
-        '<rect x="18" y="70" width="64" height="7" rx="3" fill="' + dark + '" opacity="0.5"/>';
-    } else if (c.shape === 'oval') {
-      body =
-        '<ellipse cx="50" cy="78" rx="30" ry="5" fill="' + dark + '" opacity="0.45"/>' +
-        '<ellipse cx="50" cy="51" rx="34" ry="24" fill="' + fill + '"/>' +
-        '<ellipse cx="38" cy="42" rx="10" ry="5" fill="#ffffff" opacity="0.2" transform="rotate(-20 38 42)"/>';
-    } else {
-      body =
-        '<rect x="13" y="33" width="74" height="38" rx="5" fill="' + fill + '"/>' +
-        '<rect x="13" y="33" width="74" height="10" rx="5" fill="' + light + '" opacity="0.32"/>' +
-        '<g stroke="' + dark + '" stroke-width="1.6" opacity="0.5">' +
-        '<line x1="37" y1="37" x2="37" y2="67"/>' +
-        '<line x1="50" y1="37" x2="50" y2="67"/>' +
-        '<line x1="63" y1="37" x2="63" y2="67"/></g>';
-    }
-
+    /* Everything decorative is clipped to the dome so it can't spill
+       past the edge of the piece. */
     var finish = '';
-    if (c.finish === 'drizzle') {
+    if (c.finish === 'marble') {
       finish =
-        '<g fill="none" stroke="' + c.accent + '" stroke-width="2.8" stroke-linecap="round" opacity="0.92">' +
-        '<path d="M27 43 q9 -7 18 0 t18 0"/>' +
-        '<path d="M29 54 q9 -7 18 0 t18 0"/></g>';
-    } else if (c.finish === 'dust') {
-      finish =
-        '<g fill="' + c.accent + '" opacity="0.55">' +
-        '<circle cx="36" cy="38" r="1.8"/><circle cx="47" cy="33" r="1.4"/>' +
-        '<circle cx="59" cy="40" r="1.9"/><circle cx="42" cy="50" r="1.5"/>' +
-        '<circle cx="64" cy="53" r="1.5"/><circle cx="52" cy="59" r="1.7"/>' +
-        '<circle cx="33" cy="57" r="1.3"/></g>';
-    } else if (c.finish === 'nut') {
-      finish =
-        '<g transform="rotate(-18 50 40)">' +
-        '<ellipse cx="50" cy="40" rx="12" ry="7.5" fill="' + c.accent + '"/>' +
-        '<path d="M41 40 q9 -4.5 18 0" fill="none" stroke="' + shade(c.accent, -0.32) + '" stroke-width="1.3"/>' +
+        '<g clip-path="url(#' + clip + ')" fill="none" stroke="' + c.accent + '" stroke-linecap="round">' +
+        '<path d="M12 44 C30 30 44 56 62 42 C74 33 82 40 90 36" stroke-width="7" opacity="0.55"/>' +
+        '<path d="M10 60 C26 50 40 68 58 58 C72 50 82 57 92 52" stroke-width="5" opacity="0.38"/>' +
+        '<path d="M16 32 C30 24 40 36 54 30" stroke-width="4" opacity="0.30"/>' +
         '</g>';
-    } else if (c.finish === 'shard') {
+    } else if (c.finish === 'speckle') {
       finish =
-        '<polygon points="38,38 51,29 49,45" fill="' + c.accent + '" opacity="0.95"/>' +
-        '<polygon points="54,42 67,36 60,50" fill="' + shade(c.accent, 0.16) + '" opacity="0.85"/>';
-    } else if (c.finish === 'gold') {
+        '<g clip-path="url(#' + clip + ')" fill="' + c.accent + '">' +
+        '<circle cx="34" cy="38" r="2.1" opacity="0.95"/><circle cx="47" cy="30" r="1.5" opacity="0.8"/>' +
+        '<circle cx="60" cy="37" r="2.3" opacity="0.9"/><circle cx="40" cy="52" r="1.7" opacity="0.75"/>' +
+        '<circle cx="66" cy="54" r="1.9" opacity="0.85"/><circle cx="52" cy="61" r="2" opacity="0.7"/>' +
+        '<circle cx="28" cy="58" r="1.4" opacity="0.65"/><circle cx="72" cy="43" r="1.5" opacity="0.7"/>' +
+        '<circle cx="56" cy="46" r="1.2" opacity="0.6"/>' +
+        '</g>';
+    } else if (c.finish === 'drizzle') {
       finish =
-        '<polygon points="44,33 58,28 63,38 49,44" fill="#d9b45c"/>' +
-        '<polygon points="48,35 57,31 60,37" fill="#f2dc9d" opacity="0.85"/>';
+        '<g clip-path="url(#' + clip + ')" fill="none" stroke="' + c.accent + '" ' +
+        'stroke-width="3.2" stroke-linecap="round" opacity="0.95">' +
+        '<path d="M14 42 q9 -8 18 0 t18 0 t18 0 t18 0"/>' +
+        '<path d="M14 56 q9 -8 18 0 t18 0 t18 0 t18 0"/>' +
+        '</g>';
     }
 
     return '<svg class="choc-art" viewBox="0 0 100 100" role="img" aria-label="' +
-      esc(c.name) + '" focusable="false">' + defs + body + finish + '</svg>';
+      esc(c.name) + '" focusable="false">' + defs +
+      '<ellipse cx="50" cy="73" rx="33" ry="8" fill="' + dark + '"/>' +
+      '<path d="' + DOME + '" fill="url(#' + gid + ')"/>' +
+      finish +
+      /* Two highlights: a soft sheen and a tight specular dot, which is
+         what makes a tempered shell read as glossy. */
+      '<ellipse cx="37" cy="39" rx="11" ry="6" fill="#ffffff" opacity="0.26" ' +
+      'transform="rotate(-32 37 39)"/>' +
+      '<circle cx="32" cy="34" r="2.6" fill="#ffffff" opacity="0.5"/>' +
+      '</svg>';
   }
 
   /* An open box seen from above, with the real piece count laid out in a
-     real grid — so a 9 and a 64 look as different as they are. */
+     real grid — so a 9 and a 64 look as different as they are. Drawn to
+     match the actual Louvion box: cream lid, gold-lined tray. */
   var BOX_LAYOUT = { 3: 3, 9: 3, 16: 4, 64: 8 };
-  var BOX_TONES = ['#4a2d1c', '#6b4226', '#8a5a34', '#3a2317', '#a07a5c'];
+
+  function boxTones() {
+    return CAT.CHOCOLATES.map(function (c) { return c.base; });
+  }
 
   function boxSVG(box) {
     var cols = BOX_LAYOUT[box.pieces] || Math.ceil(Math.sqrt(box.pieces));
     var rows = Math.ceil(box.pieces / cols);
+    var tones = boxTones();
 
     var W = 200, H = 140;
     var innerX = 16, innerY = 18, innerW = W - 32, innerH = H - 36;
@@ -214,27 +200,44 @@
     var gridW = cell * cols, gridH = cell * rows;
     var offX = innerX + (innerW - gridW) / 2;
     var offY = innerY + (innerH - gridH) / 2;
-    var r = cell * 0.33;
+    var r = cell * 0.34;
+
+    /* Gold dividers between the cells, like the tray insert. */
+    var grid = '<g stroke="#c9a961" stroke-width="0.8" opacity="0.55">';
+    for (var c = 0; c <= cols; c++) {
+      var x = (offX + c * cell).toFixed(1);
+      grid += '<line x1="' + x + '" y1="' + offY.toFixed(1) + '" x2="' + x +
+        '" y2="' + (offY + gridH).toFixed(1) + '"/>';
+    }
+    for (var rw = 0; rw <= rows; rw++) {
+      var y = (offY + rw * cell).toFixed(1);
+      grid += '<line x1="' + offX.toFixed(1) + '" y1="' + y + '" x2="' +
+        (offX + gridW).toFixed(1) + '" y2="' + y + '"/>';
+    }
+    grid += '</g>';
 
     var pieces = '';
     for (var i = 0; i < box.pieces; i++) {
       var cx = offX + (i % cols) * cell + cell / 2;
       var cy = offY + Math.floor(i / cols) * cell + cell / 2;
-      var tone = BOX_TONES[i % BOX_TONES.length];
+      var tone = tones[i % tones.length];
       pieces +=
+        '<circle cx="' + cx.toFixed(1) + '" cy="' + (cy + r * 0.12).toFixed(1) +
+        '" r="' + r.toFixed(1) + '" fill="#000000" opacity="0.10"/>' +
         '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) +
         '" fill="' + tone + '"/>' +
-        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) +
-        '" r="' + (r * 0.28).toFixed(1) + '" fill="#ffffff" opacity="0.16"/>';
+        '<circle cx="' + (cx - r * 0.32).toFixed(1) + '" cy="' + (cy - r * 0.32).toFixed(1) +
+        '" r="' + (r * 0.26).toFixed(1) + '" fill="#ffffff" opacity="0.30"/>';
     }
 
     return '<svg class="box-card__art" viewBox="0 0 200 140" role="img" aria-label="' +
       esc(box.name) + ', ' + box.pieces + ' pieces" focusable="false">' +
-      '<rect x="4" y="6" width="192" height="128" rx="7" fill="#3a2317"/>' +
-      '<rect x="10" y="12" width="180" height="116" rx="5" fill="#5a3722"/>' +
+      '<rect x="4" y="6" width="192" height="128" rx="8" fill="#e4dacb"/>' +
+      '<rect x="8" y="10" width="184" height="120" rx="7" fill="#fbf8f2"/>' +
       '<rect x="' + innerX + '" y="' + innerY + '" width="' + innerW + '" height="' + innerH +
-      '" rx="3" fill="#f3ece1"/>' +
-      pieces +
+      '" rx="3" fill="#f2ebdf"/>' +
+      grid + pieces +
+      '<rect x="8" y="10" width="184" height="120" rx="7" fill="none" stroke="#d9cdb9" stroke-width="1"/>' +
       '</svg>';
   }
 
@@ -531,7 +534,7 @@
         return '<article class="choc-card reveal">' +
           '<div class="choc-card__art">' + chocolateSVG(c) + '</div>' +
           '<h3 class="choc-card__name">' + esc(c.name) + '</h3>' +
-          '<div class="choc-card__family">' + esc(c.family) + ' chocolate</div>' +
+          '<div class="choc-card__family" dir="rtl" lang="ar">' + esc(c.nameAr) + '</div>' +
           '<p class="choc-card__desc">' + esc(c.desc) + '</p>' +
           '</article>';
       }).join('');
@@ -666,6 +669,7 @@
         return '<div class="picker-card' + (qty ? ' is-picked' : '') + '">' +
           '<div class="picker-card__art">' + chocolateSVG(c) + '</div>' +
           '<h3 class="picker-card__name">' + esc(c.name) + '</h3>' +
+          '<div class="picker-card__ar" dir="rtl" lang="ar">' + esc(c.nameAr) + '</div>' +
           '<p class="picker-card__desc">' + esc(c.desc) + '</p>' +
           '<div class="stepper">' +
           '<button class="stepper__btn" type="button" data-action="choc-dec" data-choc-id="' +

@@ -3,698 +3,247 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="GamerX – Premium gaming gear, consoles, and accessories for every player." />
-  <title>GamerX – Level Up Your Game</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="description" content="Louvion Chocolate — small-batch bonbons, boxed in 3, 9, 16 or 64 pieces. Choose your box, choose every piece inside it." />
+  <title>Louvion Chocolate — Choose your box, fill it your way</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body data-page="home">
 
-<!-- ░░░ PRELOADER ░░░ -->
-<div class="preloader" id="preloader">
-  <div class="preloader-inner">
-    <div class="preloader-logo"><span class="c-purple">G</span>AMER<span class="c-cyan">X</span></div>
-    <div class="preloader-bar"><div class="preloader-fill" id="preloaderFill"></div></div>
-    <p class="preloader-text">Loading Experience...</p>
-  </div>
-</div>
-
-<!-- ░░░ CURSOR ░░░ -->
-<div class="cursor" id="cursor"></div>
-<div class="cursor-follower" id="cursorFollower"></div>
-
-<!-- ░░░ NAVBAR ░░░ -->
-<header class="navbar" id="navbar">
-  <div class="nav-container">
-    <a href="#" class="logo" aria-label="GamerX Home">
-      <div class="logo-icon">⬡</div>
-      <span><span class="c-purple">G</span>AMER<span class="c-cyan">X</span></span>
+<!-- ░░░ HEADER ░░░ -->
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">Louvion</span>
+      <span class="brand__sub">Chocolate</span>
     </a>
 
-    <nav class="nav-links" role="navigation" aria-label="Main navigation">
-      <a href="#home" class="nav-link">Home</a>
-      <a href="#products" class="nav-link">Shop</a>
-      <a href="#categories" class="nav-link">Categories</a>
-      <a href="#deals" class="nav-link">Deals</a>
-      <a href="#brands" class="nav-link">Brands</a>
-      <a href="#contact" class="nav-link">Contact</a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a class="nav__link is-active" href="index.html">Home</a>
+      <a class="nav__link" href="shop.html">Shop</a>
+      <a class="nav__link" href="#story">Our craft</a>
+      <a class="nav__link" href="account.html" id="navAccount">Sign in</a>
+      <a class="nav__link" href="admin.html" id="navAdmin" hidden>Admin</a>
     </nav>
 
-    <div class="nav-right">
-      <div class="search-wrap">
-        <button class="icon-btn" id="searchToggle" aria-label="Toggle search">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        </button>
-        <div class="search-bar" id="searchBar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="search" id="searchInput" placeholder="Search products..." autocomplete="off" />
-          <button class="search-clear" id="searchClear">✕</button>
-          <div class="search-results" id="searchResults"></div>
-        </div>
-      </div>
-
-      <button class="icon-btn" id="wishlistBtn" aria-label="Wishlist">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <span class="badge-dot" id="wishlistDot" style="display:none"></span>
+    <div class="header__actions">
+      <button class="icon-btn" type="button" data-action="open-cart" aria-label="Open your box">
+        <span>Box</span>
+        <span class="cart-count is-empty" id="cartCount">0</span>
       </button>
-
-      <button class="cart-trigger" id="cartBtn" aria-label="Shopping cart">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        <span class="cart-badge" id="cartBadge">0</span>
-      </button>
-
-      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
         <span></span><span></span><span></span>
       </button>
     </div>
   </div>
-
-  <!-- Mobile Menu -->
-  <div class="mobile-nav" id="mobileNav" aria-hidden="true">
-    <a href="#home">Home</a>
-    <a href="#products">Shop</a>
-    <a href="#categories">Categories</a>
-    <a href="#deals">Deals</a>
-    <a href="#brands">Brands</a>
-    <a href="#contact">Contact</a>
-  </div>
 </header>
 
-<!-- ░░░ HERO ░░░ -->
-<section class="hero" id="home">
-  <canvas class="hero-canvas" id="heroCanvas"></canvas>
-  <div class="hero-overlay"></div>
+<main>
 
-  <div class="hero-content">
-    <div class="hero-left reveal-left">
-      <div class="hero-pill">
-        <span class="pill-dot"></span>
-        New Season — Spring 2026 Drop
-      </div>
-      <h1 class="hero-title">
-        THE ULTIMATE<br/>
-        <span class="hero-title-gradient">GAMING</span><br/>
-        DESTINATION
-      </h1>
-      <p class="hero-desc">Premium consoles, cutting-edge peripherals, and top-tier gaming gear — all in one place. Elevate your setup and dominate every session.</p>
-      <div class="hero-actions">
-        <a href="#products" class="btn btn-glow">Explore Shop</a>
-        <a href="#deals" class="btn btn-ghost">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Watch Trailer
-        </a>
-      </div>
-      <div class="hero-metrics">
-        <div class="metric">
-          <span class="metric-num" data-target="50000">0</span><span class="metric-suffix">+</span>
-          <span class="metric-label">Happy Gamers</span>
+  <!-- ░░░ HERO ░░░ -->
+  <section class="hero">
+    <div class="container hero__grid">
+      <div>
+        <p class="eyebrow">Small batch · Made to order</p>
+        <h1 class="hero__title">Choose your box.<br /><em>Fill it your way.</em></h1>
+        <p class="hero__lead">
+          Twelve bonbons, made by hand in small batches. Pick a box of three,
+          nine, sixteen or sixty-four — then choose every single piece that
+          goes inside it.
+        </p>
+        <div class="hero__actions">
+          <a class="btn" href="shop.html">Build a box</a>
+          <a class="btn btn--ghost" href="#collection">See the collection</a>
         </div>
-        <div class="metric-sep"></div>
-        <div class="metric">
-          <span class="metric-num" data-target="10000">0</span><span class="metric-suffix">+</span>
-          <span class="metric-label">Products</span>
-        </div>
-        <div class="metric-sep"></div>
-        <div class="metric">
-          <span class="metric-num" data-target="150">0</span><span class="metric-suffix">+</span>
-          <span class="metric-label">Brands</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero-right reveal-right">
-      <div class="hero-showcase">
-        <div class="showcase-ring showcase-ring-1"></div>
-        <div class="showcase-ring showcase-ring-2"></div>
-        <div class="showcase-ring showcase-ring-3"></div>
-        <div class="showcase-card showcase-main">
-          <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=700&q=85" alt="Gaming Setup" />
-          <div class="showcase-card-label">
-            <span class="live-dot"></span> Featured Setup
-          </div>
-        </div>
-        <div class="showcase-card showcase-a float-a">
-          <img src="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=300&q=80" alt="PS5" />
-          <div class="showcase-mini-info">
-            <p class="smi-name">PS5 Console</p>
-            <p class="smi-price">$499.99</p>
-          </div>
-        </div>
-        <div class="showcase-card showcase-b float-b">
-          <img src="https://images.unsplash.com/photo-1527814050087-3793815479db?w=300&q=80" alt="Headset" />
-          <div class="showcase-mini-info">
-            <p class="smi-name">Pro Headset</p>
-            <p class="smi-price">$249.99</p>
-          </div>
-        </div>
-        <div class="hero-badge">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span>Best Seller</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="hero-scroll">
-    <div class="scroll-mouse">
-      <div class="scroll-wheel"></div>
-    </div>
-    <span>Scroll to explore</span>
-  </div>
-</section>
-
-<!-- ░░░ TICKER ░░░ -->
-<div class="ticker-wrap">
-  <div class="ticker">
-    <span>FREE SHIPPING OVER $50</span><span class="sep">✦</span>
-    <span>NEW ARRIVALS WEEKLY</span><span class="sep">✦</span>
-    <span>EXCLUSIVE MEMBER DEALS</span><span class="sep">✦</span>
-    <span>24/7 GAMER SUPPORT</span><span class="sep">✦</span>
-    <span>30-DAY FREE RETURNS</span><span class="sep">✦</span>
-    <span>PRICE MATCH GUARANTEE</span><span class="sep">✦</span>
-    <span>FREE SHIPPING OVER $50</span><span class="sep">✦</span>
-    <span>NEW ARRIVALS WEEKLY</span><span class="sep">✦</span>
-    <span>EXCLUSIVE MEMBER DEALS</span><span class="sep">✦</span>
-    <span>24/7 GAMER SUPPORT</span><span class="sep">✦</span>
-    <span>30-DAY FREE RETURNS</span><span class="sep">✦</span>
-    <span>PRICE MATCH GUARANTEE</span><span class="sep">✦</span>
-  </div>
-</div>
-
-<!-- ░░░ FEATURED CATEGORIES ░░░ -->
-<section class="section categories-section" id="categories">
-  <div class="container">
-    <div class="section-label">
-      <div class="label-line"></div>
-      <span>Browse by Category</span>
-      <div class="label-line"></div>
-    </div>
-    <h2 class="section-title reveal">Shop by <span class="gradient-text">Category</span></h2>
-    <div class="cat-grid">
-      <div class="cat-hero reveal" onclick="filterProducts('consoles')" role="button" tabindex="0">
-        <img src="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=800&q=80" alt="Consoles" />
-        <div class="cat-overlay"></div>
-        <div class="cat-info">
-          <div class="cat-emoji">🎮</div>
-          <h3>Consoles</h3>
-          <p>PS5 · Xbox · Switch</p>
-          <span class="cat-cta">Shop Now →</span>
-        </div>
-        <div class="cat-glow"></div>
-      </div>
-      <div class="cat-sm reveal" onclick="filterProducts('peripherals')" role="button" tabindex="0">
-        <img src="https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=500&q=80" alt="Peripherals" />
-        <div class="cat-overlay"></div>
-        <div class="cat-info">
-          <div class="cat-emoji">⌨️</div>
-          <h3>Peripherals</h3>
-          <p>Mouse · Keyboard · Headset</p>
-          <span class="cat-cta">Shop Now →</span>
-        </div>
-      </div>
-      <div class="cat-sm reveal" onclick="filterProducts('games')" role="button" tabindex="0">
-        <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&q=80" alt="Games" />
-        <div class="cat-overlay"></div>
-        <div class="cat-info">
-          <div class="cat-emoji">💿</div>
-          <h3>Games</h3>
-          <p>New Releases · Classics</p>
-          <span class="cat-cta">Shop Now →</span>
-        </div>
-      </div>
-      <div class="cat-sm reveal" onclick="filterProducts('monitors')" role="button" tabindex="0">
-        <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500&q=80" alt="Monitors" />
-        <div class="cat-overlay"></div>
-        <div class="cat-info">
-          <div class="cat-emoji">🖥️</div>
-          <h3>Monitors</h3>
-          <p>4K · 144Hz · Curved</p>
-          <span class="cat-cta">Shop Now →</span>
-        </div>
-      </div>
-      <div class="cat-sm reveal" onclick="filterProducts('chairs')" role="button" tabindex="0">
-        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80" alt="Chairs" />
-        <div class="cat-overlay"></div>
-        <div class="cat-info">
-          <div class="cat-emoji">🪑</div>
-          <h3>Chairs</h3>
-          <p>Ergonomic · Racing Style</p>
-          <span class="cat-cta">Shop Now →</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ░░░ PRODUCTS ░░░ -->
-<section class="section products-section" id="products">
-  <div class="container">
-    <div class="section-label">
-      <div class="label-line"></div>
-      <span>Our Store</span>
-      <div class="label-line"></div>
-    </div>
-    <div class="products-header">
-      <h2 class="section-title reveal">Featured <span class="gradient-text">Products</span></h2>
-      <div class="filter-tabs" role="tablist">
-        <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
-        <button class="filter-tab" data-filter="consoles" role="tab">Consoles</button>
-        <button class="filter-tab" data-filter="peripherals" role="tab">Peripherals</button>
-        <button class="filter-tab" data-filter="games" role="tab">Games</button>
-        <button class="filter-tab" data-filter="monitors" role="tab">Monitors</button>
-        <button class="filter-tab" data-filter="chairs" role="tab">Chairs</button>
-      </div>
-    </div>
-    <div class="product-grid" id="productGrid"></div>
-    <div class="load-more-wrap">
-      <button class="btn btn-outline" id="loadMoreBtn" onclick="loadMore()">Load More Products</button>
-    </div>
-  </div>
-</section>
-
-<!-- ░░░ FLASH DEAL BANNER ░░░ -->
-<section class="flash-deal" id="deals">
-  <div class="flash-bg">
-    <div class="flash-glow-1"></div>
-    <div class="flash-glow-2"></div>
-  </div>
-  <div class="container">
-    <div class="flash-inner">
-      <div class="flash-left reveal-left">
-        <div class="flash-eyebrow">
-          <span class="pulse-dot"></span>
-          Flash Sale — Limited Time
-        </div>
-        <h2 class="flash-title">Get Up To <span class="gradient-text-alt">40% OFF</span><br/>Top Gaming Gear</h2>
-        <p class="flash-sub">Exclusive weekly deals on consoles, controllers, headsets and more. Don't let them slip away.</p>
-        <div class="countdown" id="countdown">
-          <div class="cd-block"><span class="cd-num" id="cdH">08</span><span class="cd-label">Hours</span></div>
-          <span class="cd-sep">:</span>
-          <div class="cd-block"><span class="cd-num" id="cdM">45</span><span class="cd-label">Mins</span></div>
-          <span class="cd-sep">:</span>
-          <div class="cd-block"><span class="cd-num" id="cdS">00</span><span class="cd-label">Secs</span></div>
-        </div>
-        <a href="#products" class="btn btn-glow">Grab the Deal</a>
-      </div>
-      <div class="flash-right reveal-right">
-        <div class="deal-cards">
-          <div class="deal-card" onclick="openProduct(4)">
-            <div class="deal-img">
-              <img src="https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&q=80" alt="PS5 Controller" />
-              <span class="deal-tag">-33%</span>
-            </div>
-            <div class="deal-body">
-              <p class="deal-name">PS5 DualSense Edge</p>
-              <div class="deal-pricing">
-                <span class="deal-old">$229.99</span>
-                <span class="deal-new">$154.99</span>
-              </div>
-              <div class="deal-progress">
-                <div class="deal-bar" style="width:72%"></div>
-              </div>
-              <p class="deal-stock">72% sold — hurry!</p>
-            </div>
-          </div>
-          <div class="deal-card" onclick="openProduct(5)">
-            <div class="deal-img">
-              <img src="https://images.unsplash.com/photo-1583394293253-4e8ccb4aefd9?w=400&q=80" alt="Headset" />
-              <span class="deal-tag">-40%</span>
-            </div>
-            <div class="deal-body">
-              <p class="deal-name">SteelSeries Arctis Nova</p>
-              <div class="deal-pricing">
-                <span class="deal-old">$299.99</span>
-                <span class="deal-new">$179.99</span>
-              </div>
-              <div class="deal-progress">
-                <div class="deal-bar" style="width:55%"></div>
-              </div>
-              <p class="deal-stock">55% sold — hurry!</p>
-            </div>
-          </div>
-          <div class="deal-card" onclick="openProduct(3)">
-            <div class="deal-img">
-              <img src="https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=400&q=80" alt="Switch OLED" />
-              <span class="deal-tag">-20%</span>
-            </div>
-            <div class="deal-body">
-              <p class="deal-name">Nintendo Switch OLED</p>
-              <div class="deal-pricing">
-                <span class="deal-old">$349.99</span>
-                <span class="deal-new">$279.99</span>
-              </div>
-              <div class="deal-progress">
-                <div class="deal-bar" style="width:88%"></div>
-              </div>
-              <p class="deal-stock">88% sold — almost gone!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ░░░ BRANDS ░░░ -->
-<section class="section brands-section" id="brands">
-  <div class="container">
-    <div class="section-label">
-      <div class="label-line"></div>
-      <span>Official Partners</span>
-      <div class="label-line"></div>
-    </div>
-    <h2 class="section-title reveal">Top <span class="gradient-text">Brands</span></h2>
-    <div class="brands-grid reveal">
-      <div class="brand-chip">PlayStation</div>
-      <div class="brand-chip">Xbox</div>
-      <div class="brand-chip">Nintendo</div>
-      <div class="brand-chip">Razer</div>
-      <div class="brand-chip">SteelSeries</div>
-      <div class="brand-chip">Logitech G</div>
-      <div class="brand-chip">ASUS ROG</div>
-      <div class="brand-chip">Corsair</div>
-      <div class="brand-chip">HyperX</div>
-      <div class="brand-chip">BenQ</div>
-      <div class="brand-chip">SecretLab</div>
-      <div class="brand-chip">Alienware</div>
-    </div>
-  </div>
-</section>
-
-<!-- ░░░ WHY GAMERX ░░░ -->
-<section class="section why-section">
-  <div class="container">
-    <div class="section-label">
-      <div class="label-line"></div>
-      <span>Why Choose Us</span>
-      <div class="label-line"></div>
-    </div>
-    <h2 class="section-title reveal">The <span class="gradient-text">GamerX</span> Difference</h2>
-    <div class="why-grid">
-      <div class="why-card reveal">
-        <div class="why-icon-wrap">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-        <h3>Lightning Fast Shipping</h3>
-        <p>Same-day dispatch on orders before 3PM. Next-day delivery available nationwide. Real-time tracking on every order.</p>
-      </div>
-      <div class="why-card reveal">
-        <div class="why-icon-wrap">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <h3>Bank-Level Security</h3>
-        <p>256-bit SSL encryption on every transaction. We never store card details. PayPal, Apple Pay & Google Pay accepted.</p>
-      </div>
-      <div class="why-card reveal">
-        <div class="why-icon-wrap">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        </div>
-        <h3>Hassle-Free Returns</h3>
-        <p>30-day no-questions-asked returns. Free return shipping on defective items. Refund processed within 48 hours.</p>
-      </div>
-      <div class="why-card reveal">
-        <div class="why-icon-wrap">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <h3>Expert Gamer Support</h3>
-        <p>Our team of passionate gamers are available 24/7 via live chat, Discord, and email to help with anything.</p>
-      </div>
-      <div class="why-card reveal">
-        <div class="why-icon-wrap">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-        <h3>Price Match Guarantee</h3>
-        <p>Found it cheaper elsewhere? We'll match any verified price from authorised retailers, guaranteed.</p>
-      </div>
-      <div class="why-card reveal">
-        <div class="why-icon-wrap">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </div>
-        <h3>Loyalty Rewards</h3>
-        <p>Earn XP points on every purchase. Redeem for discounts, exclusive gear drops, and early access to new arrivals.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ░░░ TESTIMONIALS ░░░ -->
-<section class="section testimonials-section">
-  <div class="container">
-    <div class="section-label">
-      <div class="label-line"></div>
-      <span>Customer Reviews</span>
-      <div class="label-line"></div>
-    </div>
-    <h2 class="section-title reveal">What Gamers <span class="gradient-text">Say</span></h2>
-    <div class="testimonials-grid">
-      <div class="testimonial-card reveal">
-        <div class="stars-row">★★★★★</div>
-        <p>"GamerX is the only place I shop for gaming gear. Insanely fast delivery, great prices, and the customer support actually knows what they're talking about."</p>
-        <div class="reviewer">
-          <div class="reviewer-avatar" style="background:linear-gradient(135deg,#6366f1,#06b6d4)">JK</div>
+        <div class="hero__meta">
           <div>
-            <p class="reviewer-name">Jake K.</p>
-            <p class="reviewer-tag">Pro Esports Player</p>
+            <div class="hero__stat-num">12</div>
+            <div class="hero__stat-label">Flavours</div>
           </div>
-        </div>
-      </div>
-      <div class="testimonial-card reveal">
-        <div class="stars-row">★★★★★</div>
-        <p>"Ordered a PS5 bundle and it arrived next morning. The packaging was perfect and the setup guide they included was genuinely helpful. 10/10 would recommend."</p>
-        <div class="reviewer">
-          <div class="reviewer-avatar" style="background:linear-gradient(135deg,#f97316,#ef4444)">SM</div>
           <div>
-            <p class="reviewer-name">Sarah M.</p>
-            <p class="reviewer-tag">Verified Customer</p>
+            <div class="hero__stat-num">4</div>
+            <div class="hero__stat-label">Box sizes</div>
           </div>
-        </div>
-      </div>
-      <div class="testimonial-card reveal">
-        <div class="stars-row">★★★★★</div>
-        <p>"The loyalty points system is amazing. I've basically gotten two sets of peripherals for free just by shopping here. The Discord community is super active too!"</p>
-        <div class="reviewer">
-          <div class="reviewer-avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">MR</div>
           <div>
-            <p class="reviewer-name">Marcus R.</p>
-            <p class="reviewer-tag">GamerX Elite Member</p>
+            <div class="hero__stat-num">48h</div>
+            <div class="hero__stat-label">Made to order</div>
           </div>
         </div>
       </div>
-      <div class="testimonial-card reveal">
-        <div class="stars-row">★★★★★</div>
-        <p>"Best prices I've found online for Razer products. Used the price match and they honored it instantly. Shopping here feels like shopping at a friend's store."</p>
-        <div class="reviewer">
-          <div class="reviewer-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">AL</div>
-          <div>
-            <p class="reviewer-name">Aisha L.</p>
-            <p class="reviewer-tag">Verified Customer</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ░░░ NEWSLETTER ░░░ -->
-<section class="newsletter-section">
-  <div class="container">
-    <div class="newsletter-card reveal">
-      <div class="newsletter-bg-pattern"></div>
-      <div class="newsletter-content">
-        <div class="newsletter-left">
-          <p class="nl-eyebrow">Join 500,000+ Gamers</p>
-          <h2>Get Exclusive Deals<br/><span class="gradient-text">Before Anyone Else</span></h2>
-          <p class="nl-sub">Early access to drops, flash sale alerts, weekly deals, and gamer tips delivered straight to your inbox.</p>
-        </div>
-        <form class="newsletter-form" id="nlForm" onsubmit="handleNewsletter(event)">
-          <div class="nl-input-group">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <input type="email" placeholder="Enter your email address" required />
-          </div>
-          <button type="submit" class="btn btn-glow">Subscribe Free</button>
-          <p class="nl-note">No spam. Unsubscribe anytime. 🔒</p>
-        </form>
+      <div class="hero__art">
+        <div class="hero__art-plate"></div>
+        <div class="hero__art-ring"></div>
+        <div class="hero__art-grid" id="heroArt"></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <!-- ░░░ BOXES ░░░ -->
+  <section class="section section--paper" id="boxes">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <p class="eyebrow">The boxes</p>
+        <h2 class="section-title">Four sizes, one rule</h2>
+        <p class="section-lead">
+          A box holds exactly what it says it holds. Fill it with one flavour,
+          or all twelve — the choice is yours right up to the last piece.
+        </p>
+      </div>
+      <div class="box-grid" id="homeBoxes"></div>
+    </div>
+  </section>
+
+  <!-- ░░░ COLLECTION ░░░ -->
+  <section class="section" id="collection">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <p class="eyebrow">The collection</p>
+        <h2 class="section-title">Every piece, in the open</h2>
+        <p class="section-lead">
+          Nothing hidden behind a lid. Here is the whole range — the same
+          twelve you'll choose from when you build your box.
+        </p>
+      </div>
+      <div class="choc-grid" id="homeCollection"></div>
+    </div>
+  </section>
+
+  <!-- ░░░ GALLERY ░░░ ═══════════════════════════════════════════════
+       TO USE YOUR OWN INSTAGRAM PHOTOS: drop four square images into
+       assets/ and change the four src="" values below to match. Nothing
+       else needs to change — everything is styled from .gallery-item.
+       Keep them roughly square (1:1); they are cropped with object-fit.
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="section section--paper" id="gallery">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <p class="eyebrow">@louvionchocolate</p>
+        <h2 class="section-title">From the kitchen</h2>
+        <p class="section-lead">
+          What we made this week. Follow along on Instagram for the pieces
+          that never make it as far as the shop.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        <figure class="gallery-item reveal">
+          <img src="assets/gallery-1.svg" alt="A box of nine Louvion bonbons seen from above" width="600" height="600" loading="lazy" />
+          <figcaption class="gallery-item__cap">La Classique, boxed</figcaption>
+        </figure>
+        <figure class="gallery-item reveal">
+          <img src="assets/gallery-2.svg" alt="A single bonbon finished with gold drizzle" width="600" height="600" loading="lazy" />
+          <figcaption class="gallery-item__cap">Passionfruit caramel</figcaption>
+        </figure>
+        <figure class="gallery-item reveal">
+          <img src="assets/gallery-3.svg" alt="A ribbon-tied Louvion gift box" width="600" height="600" loading="lazy" />
+          <figcaption class="gallery-item__cap">Tied by hand</figcaption>
+        </figure>
+        <figure class="gallery-item reveal">
+          <img src="assets/gallery-4.svg" alt="A chocolate bar surrounded by cocoa nibs" width="600" height="600" loading="lazy" />
+          <figcaption class="gallery-item__cap">Tempering day</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░░ STORY ░░░ -->
+  <section class="section section--deep" id="story">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <p class="eyebrow">Our craft</p>
+        <h2 class="section-title">Three things we don't rush</h2>
+      </div>
+      <div class="story-grid">
+        <article class="story-card reveal">
+          <div class="story-card__num">01 — Origin</div>
+          <h3 class="story-card__title">Beans before brand</h3>
+          <p class="story-card__text">
+            We buy single-origin couverture in small lots and taste every
+            delivery before it goes near a mould. If a batch isn't right,
+            it doesn't get made.
+          </p>
+        </article>
+        <article class="story-card reveal">
+          <div class="story-card__num">02 — Temper</div>
+          <h3 class="story-card__title">The snap is the proof</h3>
+          <p class="story-card__text">
+            Every shell is tempered by hand and checked by ear. That clean
+            break when you bite is the only quality report that matters.
+          </p>
+        </article>
+        <article class="story-card reveal">
+          <div class="story-card__num">03 — Freshness</div>
+          <h3 class="story-card__title">Made after you order</h3>
+          <p class="story-card__text">
+            Nothing sits in a warehouse. Your box is filled within 48 hours
+            of the order landing, then sent straight out to you.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</main>
 
 <!-- ░░░ FOOTER ░░░ -->
 <footer class="footer" id="contact">
-  <div class="footer-top">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="#" class="logo"><div class="logo-icon">⬡</div><span><span class="c-purple">G</span>AMER<span class="c-cyan">X</span></span></a>
-          <p>Your one-stop destination for premium gaming gear. We live and breathe gaming — so you can play at your best.</p>
-          <div class="footer-social">
-            <a href="#" class="social-link" aria-label="Twitter/X">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            <a href="#" class="social-link" aria-label="Discord">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.033.055a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-            </a>
-            <a href="#" class="social-link" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-            </a>
-            <a href="#" class="social-link" aria-label="YouTube">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-            </a>
-            <a href="#" class="social-link" aria-label="TikTok">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
-            </a>
-          </div>
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <div class="brand">
+          <span class="brand__mark">Louvion</span>
+          <span class="brand__sub">Chocolate</span>
         </div>
+        <p class="footer__blurb">
+          Small-batch bonbons, boxed to order. Choose the box, choose every
+          piece inside it, and we'll make it fresh.
+        </p>
+      </div>
 
-        <div class="footer-col">
-          <h4>Shop</h4>
-          <ul>
-            <li><a href="#">Consoles</a></li>
-            <li><a href="#">Controllers</a></li>
-            <li><a href="#">Headsets</a></li>
-            <li><a href="#">Keyboards & Mice</a></li>
-            <li><a href="#">Monitors</a></li>
-            <li><a href="#">Gaming Chairs</a></li>
-            <li><a href="#">New Arrivals</a></li>
-          </ul>
-        </div>
+      <div>
+        <h3 class="footer__title">Shop</h3>
+        <ul class="footer__list">
+          <li><a href="shop.html?box=box-3">La Petite · 3 pieces</a></li>
+          <li><a href="shop.html?box=box-9">La Classique · 9 pieces</a></li>
+          <li><a href="shop.html?box=box-16">La Signature · 16 pieces</a></li>
+          <li><a href="shop.html?box=box-64">La Grande · 64 pieces</a></li>
+        </ul>
+      </div>
 
-        <div class="footer-col">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Track My Order</a></li>
-            <li><a href="#">Shipping Policy</a></li>
-            <li><a href="#">Returns & Refunds</a></li>
-            <li><a href="#">Warranty Claims</a></li>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Discord Community</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Company</h4>
-          <ul>
-            <li><a href="#">About GamerX</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Press Kit</a></li>
-            <li><a href="#">Affiliate Program</a></li>
-            <li><a href="#">Investor Relations</a></li>
-          </ul>
-          <h4 style="margin-top:28px">Contact</h4>
-          <ul>
-            <li><a href="mailto:support@gamerx.com">support@gamerx.com</a></li>
-            <li><a href="tel:+18004269379">+1 (800) GAMER-X</a></li>
-          </ul>
-        </div>
+      <div>
+        <h3 class="footer__title">Contact</h3>
+        <ul class="footer__list">
+          <li><a href="https://www.instagram.com/louvionchocolate/" rel="noopener noreferrer" target="_blank">@louvionchocolate</a></li>
+          <li><a href="mailto:hello@louvion.com">hello@louvion.com</a></li>
+          <li><a href="account.html">Your account</a></li>
+          <li>Tue–Sat · 10:00–19:00</li>
+        </ul>
       </div>
     </div>
-  </div>
 
-  <div class="footer-bottom">
-    <div class="container footer-bottom-inner">
-      <p>© 2026 GamerX Inc. All rights reserved.</p>
-      <div class="footer-legal">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Cookie Settings</a>
-      </div>
-      <div class="payment-icons">
-        <span class="pay-icon">VISA</span>
-        <span class="pay-icon">MC</span>
-        <span class="pay-icon">AMEX</span>
-        <span class="pay-icon">PayPal</span>
-        <span class="pay-icon">⚡ Pay</span>
-      </div>
+    <div class="footer__bottom">
+      <span>© 2026 Louvion Chocolate. All rights reserved.</span>
+      <span>Made fresh to order.</span>
     </div>
   </div>
 </footer>
 
 <!-- ░░░ CART DRAWER ░░░ -->
-<div class="drawer-overlay" id="drawerOverlay"></div>
-<aside class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Shopping cart" aria-modal="true">
-  <div class="drawer-header">
-    <div class="drawer-title">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-      <h2>Cart <span id="drawerCount">(0)</span></h2>
-    </div>
-    <button class="drawer-close" id="drawerClose" aria-label="Close cart">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+<div class="scrim" id="scrim" data-action="close-cart"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Your box">
+  <div class="drawer__head">
+    <h2 class="drawer__title" id="drawerTitle">Your box</h2>
+    <button class="drawer__close" type="button" data-action="close-cart" aria-label="Close">×</button>
   </div>
-
-  <div class="drawer-body">
-    <div class="cart-empty-state" id="cartEmptyState">
-      <div class="empty-illustration">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-      </div>
-      <h3>Your cart is empty</h3>
-      <p>Looks like you haven't added anything yet. Start shopping to fill it up!</p>
-      <button class="btn btn-glow" onclick="closeCart()">Browse Products</button>
-    </div>
-    <div id="cartItemsList"></div>
-  </div>
-
-  <div class="drawer-footer" id="drawerFooter">
-    <div class="cart-summary">
-      <div class="summary-row">
-        <span>Subtotal</span>
-        <span id="summarySubtotal">$0.00</span>
-      </div>
-      <div class="summary-row">
-        <span>Shipping</span>
-        <span id="summaryShipping" class="text-green">Free</span>
-      </div>
-      <div class="summary-row summary-row-total">
-        <span>Total</span>
-        <span id="summaryTotal">$0.00</span>
-      </div>
-    </div>
-    <button class="btn btn-glow btn-full" onclick="handleCheckout()">
-      Proceed to Checkout
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </button>
-    <button class="btn btn-ghost btn-full" onclick="closeCart()">Continue Shopping</button>
-    <div class="cart-trust">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      <span>Secure checkout · SSL encrypted</span>
-    </div>
-  </div>
+  <div class="drawer__body" id="drawerBody"></div>
+  <div class="drawer__foot" id="drawerFoot"></div>
 </aside>
 
-<!-- ░░░ PRODUCT MODAL ░░░ -->
-<div class="modal-overlay" id="modalOverlay"></div>
-<div class="product-modal" id="productModal" role="dialog" aria-modal="true">
-  <button class="modal-close" id="modalClose" aria-label="Close">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <div class="modal-body" id="modalBody"></div>
-</div>
+<!-- ░░░ TOASTS ░░░ -->
+<div class="toasts" id="toasts" aria-live="polite"></div>
 
-<!-- ░░░ WISHLIST DRAWER ░░░ -->
-<aside class="wishlist-drawer" id="wishlistDrawer" role="dialog" aria-label="Wishlist">
-  <div class="drawer-header">
-    <div class="drawer-title">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      <h2>Wishlist <span id="wishlistCount">(0)</span></h2>
-    </div>
-    <button class="drawer-close" onclick="closeWishlist()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-  <div class="drawer-body" id="wishlistBody"></div>
-</aside>
-
-<!-- ░░░ TOAST ░░░ -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- ░░░ BACK TO TOP ░░░ -->
-<button class="back-to-top" id="backToTop" aria-label="Back to top">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
-</button>
-
+<script src="catalog.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

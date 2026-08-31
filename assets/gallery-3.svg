@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="A ribbon-tied Louvion gift box">
+<rect width="600" height="600" fill="#f3ece1"/>
+<ellipse cx="300" cy="470" rx="205" ry="28" fill="#3a2317" opacity="0.1"/>
+<rect x="95" y="205" width="410" height="255" rx="14" fill="#5a3722"/>
+<rect x="80" y="160" width="440" height="86" rx="12" fill="#3a2317"/>
+<rect x="272" y="160" width="56" height="300" fill="#b8893b"/>
+<rect x="80" y="330" width="440" height="52" fill="#b8893b" opacity="0.92"/>
+<path d="M300 160 C240 120 170 118 178 158 C184 190 258 172 300 160 Z" fill="#b8893b"/>
+<path d="M300 160 C360 120 430 118 422 158 C416 190 342 172 300 160 Z" fill="#b8893b"/>
+<circle cx="300" cy="158" r="20" fill="#a2762f"/>
+</svg>

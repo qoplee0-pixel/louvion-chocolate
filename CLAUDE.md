@@ -4,110 +4,118 @@ Guidance for AI assistants (and humans) working in this repository.
 
 ## What this is
 
-**GamerX** — a single-page marketing/e-commerce website for a fictional gaming
-gear retailer. It's a static site: three files, no framework, no build step,
-no package manager, no backend.
+**Louvion Chocolate** — a four-page storefront for a small chocolatier. The
+customer picks a box (3, 9, 16 or 64 pieces), fills it chocolate by
+chocolate, and checks out against a real account. A studio page shows the
+orders that come in.
+
+It is deliberately dependency-free: no npm packages, no bundler, no
+framework, no build step. The server is Node built-ins only.
 
 ```
-index.html   – all markup, one page, sections in DOM order matching the nav
-style.css    – all styles (one file, ~1800 lines)
-app.js       – all behavior (one file, ~900 lines)
-.netlify/netlify.toml – Netlify deploy config (publishes the repo root as-is)
+index.html    Home — hero, boxes, collection, gallery, story
+shop.html     Build a box — choose a size, then fill it
+account.html  Sign in / register, and order history
+admin.html    Studio — all orders, status control (admin only)
+
+catalog.js    Boxes, chocolates, prices, delivery — read by BOTH sides
+app.js        All browser behaviour
+style.css     All styles
+server.js     Static files + JSON API + authentication
+assets/       Gallery SVGs and favicon
+data/         Runtime store (users, orders). Gitignored. Never serve it.
 ```
 
-There is no `package.json`, no bundler, no test suite, and no CI. Everything
-runs directly in the browser off these three files.
-
-## Running it locally
-
-No install step. Serve the directory with any static file server and open it,
-or just open `index.html` directly in a browser. Example:
+## Running it
 
 ```
-python3 -m http.server 8000
+node server.js          # http://localhost:8080
 ```
 
-There is no lint/build/test command to run — verify changes by loading the
-page in a browser and exercising the feature.
+There is no lint/build/test command in the repo. Verify changes by loading
+the page and exercising the feature. On first run the server prints a
+generated admin password once; `LOUVION_ADMIN_PASSWORD` overrides it.
 
-## Deployment
-
-Netlify deploys straight from the repo root (`.netlify/netlify.toml`, `publish
-= "/home/user/claude"` — i.e. no build command, no dist folder). Pushing to
-the deployed branch is effectively pushing to production; there's no staging
-step baked into the repo.
+Opening `index.html` straight off the filesystem will render the pages but
+every `/api/*` call fails — sign-in, checkout and the studio need the
+server. Always test through `node server.js`.
 
 ## Architecture
 
-### `index.html`
-One long page. Sections appear in this order and are wired to the nav via
-anchor IDs: `#home` (hero) → categories → `#products` → `#deals` (flash sale)
-→ `#brands` → why-us → testimonials → newsletter → `#contact` (footer). Cart
-drawer, wishlist drawer, product modal, and toast container are appended at
-the end of `<body>` as overlay elements controlled by `app.js`. Section
-dividers are marked with `<!-- ░░░ NAME ░░░ -->` comments — keep that
-convention when adding a new section.
+### `catalog.js` — the single source of truth
+A UMD-ish module: `module.exports` under Node, `window.LOUVION_CATALOG` in
+the browser. Holds `BOXES`, `CHOCOLATES`, `SHIPPING`, `CURRENCY` and
+`ORDER_STATUSES`.
+
+**Both the browser and the server read this file**, and that is the point:
+`priceOrder()` in `server.js` rebuilds every order from it and discards any
+price the client sent. Never duplicate a price or a box size into `app.js`
+or `server.js` — add it here and read it from both.
+
+- Prices are **integer cents** everywhere; only `formatPrice()` renders them.
+- A box's `pieces` is enforced server-side — an order is rejected unless the
+  chosen chocolates sum to exactly that number.
+- A chocolate's `shape` / `base` / `accent` / `finish` drive the hand-drawn
+  SVG in `app.js`. There are no product photos to manage.
+- A new box size also needs its grid shape in `BOX_LAYOUT` in `app.js`.
+
+### `server.js`
+One file, Node built-ins only (`http`, `crypto`, `fs`, `path`). Sections are
+delimited by `/* ═══ NAME ═══ */` banners: CONFIG, STORAGE, CRYPTO, SESSIONS,
+RATE LIMITING, HTTP HELPERS, VALIDATION, AUTH PLUMBING, API ROUTES, STATIC
+FILES, SERVER, BOOTSTRAP.
+
+Routes are matched as `` `${method} ${pathname}` `` strings in `handleApi()`.
+Storage is JSON files under `data/`, written atomically through
+`mutateJson()` — always use it for read-modify-write so concurrent requests
+can't clobber each other.
+
+**When touching this file, keep these invariants:**
+- `role` is assigned by the server, never read from a request body.
+- Every state-changing route calls `requireCsrf()`.
+- Every admin route re-checks `ctx.user.role !== 'admin'`.
+- Errors thrown with a `status` below 500 have their message shown to the
+  user; anything else surfaces as a generic message. Never leak a stack.
+- Auth failures return one identical message regardless of cause.
 
 ### `app.js`
-Everything is plain global functions and module-level state — no classes, no
-modules, no framework. Structure:
+Plain functions and module-level state inside one IIFE — no classes, no
+modules, no framework. Same `/* ═══ NAME ═══ */` banner convention.
 
-- **`PRODUCTS`** (top of file): the entire product catalogue as a hardcoded
-  array of objects (`id, name, category, price, originalPrice, rating,
-  reviews, ribbon, inStock, image, desc, specs`). This is the only "data
-  layer" in the app — adding a product means appending an object here with
-  the next sequential `id`. `category` values must match the filter tabs in
-  `index.html` (`consoles`, `peripherals`, `games`, `monitors`, `chairs`) and
-  the `onclick="filterProducts('...')"` calls in the categories section.
-  `ribbon` must be one of the keys handled in `ribbonLabel()` (`hot`, `new`,
-  `sale`, `lim`).
-- **State** (module-level `let`s below `PRODUCTS`): `cart` and `wishlist`
-  persist to `localStorage` under the keys `gx-cart` / `gx-wishlist` as
-  arrays of `{id, qty}`-shaped entries; call `saveCart()` /
-  the wishlist equivalent after mutating them.
-- **Init**: a single `DOMContentLoaded` listener at the top calls one
-  `initX()` function per feature area (preloader, cursor, navbar, hamburger,
-  search, cart drawer, wishlist, modal, back-to-top, reveal-on-scroll,
-  filter tabs) then renders initial UI (`renderProducts`, `updateCartUI`,
-  `updateWishlistUI`, `animateMetrics`, `initCountdown`, `initCanvas`). When
-  adding a new interactive feature, follow this pattern: write an `initFoo()`
-  that wires up its own DOM listeners, and register it in that
-  `DOMContentLoaded` block.
-- **Sections** are separated by `/* ═══ NAME ═══ */` banner comments (mirrors
-  `style.css`) — grep for these to jump between features (PRELOADER, CURSOR,
-  NAVBAR, SEARCH, PRODUCTS/FILTERING, CART, WISHLIST, MODAL, TOAST, COUNTDOWN,
-  NEWSLETTER, etc).
-- Rendering is done via template-literal `innerHTML` assignment (e.g.
-  `renderProducts`, `renderCartItems`, `renderWishlistItems`, `openProduct`'s
-  modal body) — there's no virtual DOM or diffing, each re-render replaces
-  the container's full `innerHTML`.
-- Product images are hotlinked Unsplash URLs with query params for sizing
-  (`?w=600&q=85`) — keep that pattern for consistency if adding images.
+A single `DOMContentLoaded` handler runs the shared setup, awaits
+`loadSession()`, then dispatches on `document.body.dataset.page`
+(`home` / `shop` / `account` / `admin`). New feature? Write an `initFoo()`
+that wires its own listeners and register it there.
+
+Rendering is template-literal `innerHTML` assignment — each re-render
+replaces the container's full contents. **Everything interpolated goes
+through `esc()`** (or `escMultiline()` where line breaks matter).
 
 ### `style.css`
-Single file, custom-property driven. All colors, spacing radii, shadows, and
-transitions are defined as CSS variables on `:root` at the top — always reuse
-these (`--purple`, `--cyan`, `--bg-card`, `--radius-md`, `--shadow-md`,
-`--transition`, etc.) rather than hardcoding new colors/values. Sections are
-delimited by the same `/* ═══ NAME ═══ */` banners as `app.js`, in the same
-order as the sections in `index.html` — keep new component styles colocated
-with their section rather than appended at the end. Dark theme only (no
-light-mode variant, no `prefers-color-scheme` handling).
+Single file, custom-property driven. All colours, spacing, radii, shadows
+and transitions are CSS variables on `:root` — reuse them
+(`--cocoa-900`, `--gold`, `--line`, `--radius-md`, `--transition`) rather
+than hardcoding. Sections use the same banner convention and the same order
+as the markup. Light theme only.
 
 ## Conventions to follow
 
-- **No dependencies, no build step.** Don't introduce npm/bundlers/frameworks
-  unless explicitly asked — the whole point of this repo is that it runs as
-  three static files.
-- **Keep the three-file split.** HTML structure in `index.html`, all CSS in
-  `style.css`, all JS in `app.js`. Don't split into multiple JS/CSS files
-  without being asked.
-- **Global function style.** `app.js` uses plain functions and inline
-  `onclick="..."` handlers wired straight into the HTML (e.g.
-  `onclick="filterProducts('consoles')"`, `onclick="openProduct(4)"`). Match
-  this style rather than converting to addEventListener-only or ES modules.
-- **Data lives in `PRODUCTS`.** There's no API/backend — new products,
-  categories, or catalogue changes go directly into the `PRODUCTS` array and
-  (if adding a category) the filter tabs / category cards in `index.html`.
-  Category slugs, ribbon keys, and IDs must stay consistent across
-  `index.html` and `app.js`.
+- **No dependencies, no build step.** Don't introduce npm, a bundler or a
+  framework unless explicitly asked.
+- **Keep the file split.** Markup in the `.html` pages, all CSS in
+  `style.css`, all browser JS in `app.js`, catalogue data in `catalog.js`,
+  everything server-side in `server.js`.
+- **The CSP has no `unsafe-inline`.** This is load-bearing, not decoration:
+  - No inline `onclick=""`. Add a `data-action` and a branch in
+    `initActions()` — one delegated listener handles the whole site.
+  - No inline `<style>` and no `style=""` attributes, including inside
+    template literals. Set dynamic values from JS with
+    `el.style.setProperty()`, which CSP allows, or use a class.
+  - SVG presentation attributes (`fill=`, `stroke=`) are fine — they aren't
+    CSS inline styles.
+- **Nothing loads from a third party.** No CDN, no web font, no remote
+  images. `--serif` / `--sans` are system stacks; product art is generated
+  SVG. Keep it that way — it's what lets the CSP stay this tight.
+- **Never trust the client for money or identity.** Prices, roles and box
+  capacity are decided server-side, always.
+- **Never commit `data/`.** It holds password hashes and customer addresses.

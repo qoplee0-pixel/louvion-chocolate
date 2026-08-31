@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in to your Louvion Chocolate account to check out and follow your orders." />
+  <meta name="robots" content="noindex" />
+  <title>Your account — Louvion Chocolate</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="account">
+
+<!-- ░░░ HEADER ░░░ -->
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">Louvion</span>
+      <span class="brand__sub">Chocolate</span>
+    </a>
+
+    <nav class="nav" id="nav" aria-label="Main">
+      <a class="nav__link" href="index.html">Home</a>
+      <a class="nav__link" href="shop.html">Shop</a>
+      <a class="nav__link" href="index.html#story">Our craft</a>
+      <a class="nav__link is-active" href="account.html" id="navAccount">Sign in</a>
+      <a class="nav__link" href="admin.html" id="navAdmin" hidden>Admin</a>
+    </nav>
+
+    <div class="header__actions">
+      <button class="icon-btn" type="button" data-action="open-cart" aria-label="Open your box">
+        <span>Box</span>
+        <span class="cart-count is-empty" id="cartCount">0</span>
+      </button>
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ░░░ SIGN IN / REGISTER ░░░ -->
+  <section class="section" id="authView" hidden>
+    <div class="container">
+      <div class="auth-wrap">
+        <div class="auth-head">
+          <h1>Your account</h1>
+          <p>Sign in to check out and follow your orders.</p>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab is-active" type="button" role="tab" aria-selected="true"
+                  data-action="auth-tab" data-tab="login">Sign in</button>
+          <button class="tab" type="button" role="tab" aria-selected="false"
+                  data-action="auth-tab" data-tab="register">Create account</button>
+        </div>
+
+        <div id="authError" hidden></div>
+
+        <!-- Sign in -->
+        <div id="loginPanel">
+          <form id="loginForm" novalidate>
+            <div class="field">
+              <label class="label" for="loginEmail">Email</label>
+              <input class="input" id="loginEmail" name="email" type="email"
+                     autocomplete="email" maxlength="254" required />
+            </div>
+            <div class="field">
+              <label class="label" for="loginPassword">Password</label>
+              <input class="input" id="loginPassword" name="password" type="password"
+                     autocomplete="current-password" maxlength="200" required />
+            </div>
+            <button class="btn btn--full" type="submit" id="loginBtn">Sign in</button>
+          </form>
+          <p class="auth-foot">
+            New here? <button class="link-quiet text-btn" type="button"
+              data-action="auth-tab" data-tab="register">Create an account</button>
+          </p>
+        </div>
+
+        <!-- Create account -->
+        <div id="registerPanel" hidden>
+          <form id="registerForm" novalidate>
+            <div class="field">
+              <label class="label" for="regName">Name</label>
+              <input class="input" id="regName" name="name" type="text"
+                     autocomplete="name" maxlength="80" required />
+            </div>
+            <div class="field">
+              <label class="label" for="regEmail">Email</label>
+              <input class="input" id="regEmail" name="email" type="email"
+                     autocomplete="email" maxlength="254" required />
+            </div>
+            <div class="field">
+              <label class="label" for="regPassword">Password</label>
+              <input class="input" id="regPassword" name="password" type="password"
+                     autocomplete="new-password" minlength="10" maxlength="200" required />
+              <span class="field-hint">At least 10 characters. A short phrase works well.</span>
+            </div>
+            <button class="btn btn--full" type="submit" id="registerBtn">Create account</button>
+          </form>
+          <p class="auth-foot">
+            Already have one? <button class="link-quiet text-btn" type="button"
+              data-action="auth-tab" data-tab="login">Sign in</button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░░ SIGNED IN ░░░ -->
+  <section class="section" id="accountView" hidden>
+    <div class="container">
+      <div class="account-head">
+        <div>
+          <p class="eyebrow">Your account</p>
+          <h1 class="account-head__name" id="accountName"></h1>
+          <p class="account-head__mail" id="accountEmail"></p>
+        </div>
+        <div class="header__actions">
+          <span class="badge badge--admin" id="accountAdminBadge" hidden>Studio access</span>
+          <a class="btn btn--ghost btn--sm" href="admin.html" id="accountAdminLink" hidden>Admin</a>
+          <button class="btn btn--ghost btn--sm" type="button" data-action="logout">Sign out</button>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <h2 class="section-title">Your orders</h2>
+      </div>
+
+      <div id="orderList"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ░░░ FOOTER ░░░ -->
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <div class="brand">
+          <span class="brand__mark">Louvion</span>
+          <span class="brand__sub">Chocolate</span>
+        </div>
+        <p class="footer__blurb">
+          Small-batch bonbons, boxed to order. Choose the box, choose every
+          piece inside it, and we'll make it fresh.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="footer__title">Shop</h3>
+        <ul class="footer__list">
+          <li><a href="shop.html?box=box-3">La Petite · 3 pieces</a></li>
+          <li><a href="shop.html?box=box-9">La Classique · 9 pieces</a></li>
+          <li><a href="shop.html?box=box-16">La Signature · 16 pieces</a></li>
+          <li><a href="shop.html?box=box-64">La Grande · 64 pieces</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer__title">Contact</h3>
+        <ul class="footer__list">
+          <li><a href="https://www.instagram.com/louvionchocolate/" rel="noopener noreferrer" target="_blank">@louvionchocolate</a></li>
+          <li><a href="mailto:hello@louvion.com">hello@louvion.com</a></li>
+          <li><a href="shop.html">Build a box</a></li>
+          <li>Tue–Sat · 10:00–19:00</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© 2026 Louvion Chocolate. All rights reserved.</span>
+      <span>Made fresh to order.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ░░░ CART DRAWER ░░░ -->
+<div class="scrim" id="scrim" data-action="close-cart"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Your box">
+  <div class="drawer__head">
+    <h2 class="drawer__title" id="drawerTitle">Your box</h2>
+    <button class="drawer__close" type="button" data-action="close-cart" aria-label="Close">×</button>
+  </div>
+  <div class="drawer__body" id="drawerBody"></div>
+  <div class="drawer__foot" id="drawerFoot"></div>
+</aside>
+
+<!-- ░░░ TOASTS ░░░ -->
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="catalog.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="A Louvion chocolate bar with cocoa nibs">
+<rect width="600" height="600" fill="#f3ece1"/>
+<g transform="rotate(-14 300 300)">
+<rect x="128" y="188" width="344" height="224" rx="12" fill="#2e1c12"/>
+<rect x="140" y="200" width="320" height="200" rx="8" fill="#5a3722"/>
+<line x1="220" y1="200" x2="220" y2="400" stroke="#2e1c12" stroke-width="7"/>
+<line x1="300" y1="200" x2="300" y2="400" stroke="#2e1c12" stroke-width="7"/>
+<line x1="380" y1="200" x2="380" y2="400" stroke="#2e1c12" stroke-width="7"/>
+<line x1="140" y1="300" x2="460" y2="300" stroke="#2e1c12" stroke-width="7"/>
+<rect x="146" y="206" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="146" y="206" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+<rect x="226" y="206" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="226" y="206" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+<rect x="306" y="206" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="306" y="206" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+<rect x="386" y="206" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="386" y="206" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+<rect x="146" y="306" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="146" y="306" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+<rect x="226" y="306" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="226" y="306" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+<rect x="306" y="306" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="306" y="306" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+<rect x="386" y="306" width="68" height="88" rx="4" fill="#6b4226"/>
+<rect x="386" y="306" width="68" height="16" rx="4" fill="#8a5a34" opacity="0.5"/>
+</g>
+<ellipse cx="112" cy="132" rx="17" ry="11" fill="#3a2317" transform="rotate(20 112 132)"/>
+<ellipse cx="492" cy="150" rx="14" ry="9" fill="#3a2317" transform="rotate(-35 492 150)"/>
+<ellipse cx="88" cy="470" rx="15" ry="9" fill="#3a2317" transform="rotate(10 88 470)"/>
+<ellipse cx="500" cy="462" rx="18" ry="11" fill="#3a2317" transform="rotate(-15 500 462)"/>
+<ellipse cx="300" cy="96" rx="12" ry="7" fill="#3a2317" transform="rotate(45 300 96)"/>
+<ellipse cx="178" cy="506" rx="13" ry="8" fill="#3a2317" transform="rotate(-25 178 506)"/>
+<ellipse cx="420" cy="516" rx="15" ry="9" fill="#3a2317" transform="rotate(30 420 516)"/>
+</svg>

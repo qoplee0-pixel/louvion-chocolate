@@ -1,25 +1,32 @@
-plugins = []
-headers = []
-redirects = []
-
-[functions]
-
-[functions."*"]
+# Netlify serves the repo root as-is.
+#
+# NOTE: this publishes the static pages only. server.js is what provides
+# /api/* — sign-in, checkout and the studio page — and Netlify's static
+# hosting does not run it. Deploy server.js to a Node host (Render, Railway,
+# Fly.io, a VPS) for the shop to actually take orders. See README.md.
+#
+# The headers below mirror the ones server.js sets, so the static side is
+# hardened the same way wherever it is served from.
 
 [build]
 publish = "/home/user/claude"
 publishOrigin = "default"
 
-[build.environment]
+[[headers]]
+for = "/*"
 
-[build.processing]
+  [headers.values]
+  Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'"
+  X-Content-Type-Options = "nosniff"
+  X-Frame-Options = "DENY"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+  Cross-Origin-Opener-Policy = "same-origin"
+  Strict-Transport-Security = "max-age=63072000; includeSubDomains"
 
-[build.processing.css]
-
-[build.processing.html]
-
-[build.processing.images]
-
-[build.processing.js]
-
-[build.services]
+# The runtime store must never be reachable over HTTP.
+[[redirects]]
+from = "/data/*"
+to = "/404.html"
+status = 404
+force = true

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="A single Louvion bonbon finished with gold drizzle">
+<rect width="600" height="600" fill="#f3ece1"/>
+<circle cx="300" cy="300" r="215" fill="#faf7f2"/>
+<circle cx="300" cy="300" r="215" fill="none" stroke="#e6ddd0" stroke-width="2"/>
+<ellipse cx="300" cy="432" rx="150" ry="26" fill="#3a2317" opacity="0.13"/>
+<defs><linearGradient id="d" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#8a5a34"/><stop offset="0.55" stop-color="#5a3722"/><stop offset="1" stop-color="#2e1c12"/></linearGradient></defs>
+<path d="M140 420 C140 250 205 175 300 175 C395 175 460 250 460 420 Z" fill="url(#d)"/>
+<ellipse cx="240" cy="265" rx="46" ry="26" fill="#ffffff" opacity="0.18" transform="rotate(-30 240 265)"/>
+<g fill="none" stroke="#b8893b" stroke-width="13" stroke-linecap="round" opacity="0.95"><path d="M178 288 q44 -34 88 0 t88 0 t88 0"/><path d="M186 340 q44 -34 88 0 t88 0 t80 0"/></g>
+</svg>

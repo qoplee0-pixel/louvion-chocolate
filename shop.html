@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Build your Louvion box — pick a 3, 9, 16 or 64 piece box, then choose every chocolate that goes inside it." />
+  <title>Build your box — Louvion Chocolate</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="shop">
+
+<!-- ░░░ HEADER ░░░ -->
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">Louvion</span>
+      <span class="brand__sub">Chocolate</span>
+    </a>
+
+    <nav class="nav" id="nav" aria-label="Main">
+      <a class="nav__link" href="index.html">Home</a>
+      <a class="nav__link is-active" href="shop.html">Shop</a>
+      <a class="nav__link" href="index.html#story">Our craft</a>
+      <a class="nav__link" href="account.html" id="navAccount">Sign in</a>
+      <a class="nav__link" href="admin.html" id="navAdmin" hidden>Admin</a>
+    </nav>
+
+    <div class="header__actions">
+      <button class="icon-btn" type="button" data-action="open-cart" aria-label="Open your box">
+        <span>Box</span>
+        <span class="cart-count is-empty" id="cartCount">0</span>
+      </button>
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ░░░ STEP 1 — CHOOSE A BOX ░░░ -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Build your box</p>
+        <h1 class="section-title">Start with the box</h1>
+        <p class="section-lead">
+          Each box holds an exact number of pieces. Choose the size first —
+          you can change it at any point before you add it to your basket.
+        </p>
+      </div>
+
+      <div class="step-head">
+        <span class="step-num">1</span>
+        <h2 class="step-title">Choose a size</h2>
+      </div>
+
+      <div class="box-grid" id="boxGrid"></div>
+    </div>
+  </section>
+
+  <!-- ░░░ STEP 2 — FILL IT ░░░ -->
+  <section class="section section--paper" id="stepFill" hidden>
+    <div class="container">
+      <div class="step-head">
+        <span class="step-num">2</span>
+        <h2 class="step-title">Fill it with what you like</h2>
+        <span class="step-note" id="fillNote"></span>
+      </div>
+
+      <div class="builder">
+        <div class="choc-grid" id="chocPicker"></div>
+
+        <aside class="builder__panel" aria-label="Your box so far">
+          <h3 class="builder__panel-title" id="panelTitle">Your box</h3>
+
+          <div class="progress-label">
+            <span id="progressCount"><strong>0</strong> of 0 chosen</span>
+          </div>
+          <div class="progress">
+            <div class="progress__fill" id="progressFill"></div>
+          </div>
+
+          <div class="tray" id="tray"></div>
+
+          <div class="panel-row">
+            <span>Box price</span>
+            <span id="panelPrice">—</span>
+          </div>
+          <div class="panel-row">
+            <span>Delivery</span>
+            <span id="panelShipping">—</span>
+          </div>
+
+          <div class="panel-actions">
+            <button class="btn btn--full" type="button" data-action="add-to-cart" id="addToCartBtn" disabled>
+              Choose your pieces
+            </button>
+            <button class="btn btn--ghost btn--full" type="button" data-action="fill-rest" id="fillRestBtn">
+              Fill the rest — chef's choice
+            </button>
+            <button class="text-btn" type="button" data-action="clear-picks" id="clearBtn" hidden>
+              Start this box again
+            </button>
+          </div>
+
+          <p class="hint">
+            A box has to be exactly full before it can go in your basket —
+            that way nothing arrives half empty.
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ░░░ FOOTER ░░░ -->
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <div class="brand">
+          <span class="brand__mark">Louvion</span>
+          <span class="brand__sub">Chocolate</span>
+        </div>
+        <p class="footer__blurb">
+          Small-batch bonbons, boxed to order. Choose the box, choose every
+          piece inside it, and we'll make it fresh.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="footer__title">Shop</h3>
+        <ul class="footer__list">
+          <li><a href="shop.html?box=box-3">La Petite · 3 pieces</a></li>
+          <li><a href="shop.html?box=box-9">La Classique · 9 pieces</a></li>
+          <li><a href="shop.html?box=box-16">La Signature · 16 pieces</a></li>
+          <li><a href="shop.html?box=box-64">La Grande · 64 pieces</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer__title">Contact</h3>
+        <ul class="footer__list">
+          <li><a href="https://www.instagram.com/louvionchocolate/" rel="noopener noreferrer" target="_blank">@louvionchocolate</a></li>
+          <li><a href="mailto:hello@louvion.com">hello@louvion.com</a></li>
+          <li><a href="account.html">Your account</a></li>
+          <li>Tue–Sat · 10:00–19:00</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© 2026 Louvion Chocolate. All rights reserved.</span>
+      <span>Made fresh to order.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ░░░ CART DRAWER ░░░ -->
+<div class="scrim" id="scrim" data-action="close-cart"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Your box">
+  <div class="drawer__head">
+    <h2 class="drawer__title" id="drawerTitle">Your box</h2>
+    <button class="drawer__close" type="button" data-action="close-cart" aria-label="Close">×</button>
+  </div>
+  <div class="drawer__body" id="drawerBody"></div>
+  <div class="drawer__foot" id="drawerFoot"></div>
+</aside>
+
+<!-- ░░░ TOASTS ░░░ -->
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="catalog.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

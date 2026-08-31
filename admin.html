@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Louvion Chocolate studio — order management." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Studio — Louvion Chocolate</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="admin">
+
+<!-- ░░░ HEADER ░░░ -->
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">Louvion</span>
+      <span class="brand__sub">Studio</span>
+    </a>
+
+    <nav class="nav" id="nav" aria-label="Main">
+      <a class="nav__link" href="index.html">Home</a>
+      <a class="nav__link" href="shop.html">Shop</a>
+      <a class="nav__link" href="account.html" id="navAccount">Account</a>
+      <a class="nav__link is-active" href="admin.html" id="navAdmin" hidden>Admin</a>
+    </nav>
+
+    <div class="header__actions">
+      <button class="icon-btn" type="button" data-action="logout">Sign out</button>
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ░░░ ORDERS ░░░ -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="account-head">
+        <div>
+          <p class="eyebrow">Studio</p>
+          <h1 class="account-head__name">Orders</h1>
+          <p class="account-head__mail">Signed in as <span id="adminWho"></span></p>
+        </div>
+        <button class="btn btn--ghost btn--sm" type="button" id="refreshBtn">Refresh</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat__label">Orders</div>
+          <div class="stat__value" id="statOrders">0</div>
+          <div class="stat__sub">All time</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Revenue</div>
+          <div class="stat__value" id="statRevenue">—</div>
+          <div class="stat__sub">Cancelled excluded</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Needs action</div>
+          <div class="stat__value" id="statPending">0</div>
+          <div class="stat__sub">Pending or confirmed</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Pieces to make</div>
+          <div class="stat__value" id="statPieces">0</div>
+          <div class="stat__sub">Across all orders</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="toolbar">
+        <label class="visually-hidden" for="filterSearch">Search orders</label>
+        <input class="input" id="filterSearch" type="search" maxlength="80"
+               placeholder="Search order, customer or recipient" />
+
+        <label class="visually-hidden" for="filterStatus">Filter by status</label>
+        <select class="select" id="filterStatus">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="making">Making</option>
+          <option value="shipped">Shipped</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Order</th>
+              <th scope="col">Customer</th>
+              <th scope="col">Deliver to</th>
+              <th scope="col">Boxes &amp; contents</th>
+              <th scope="col">Total</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody id="adminRows">
+            <tr><td colspan="6"><div class="table-empty">Loading orders…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ░░░ TOASTS ░░░ -->
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="catalog.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

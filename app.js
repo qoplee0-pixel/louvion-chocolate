@@ -1,906 +1,1124 @@
-/* ═══════════════════════════════════════════
-   GAMERX — Main Application
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   LOUVION — CLIENT
+   Plain functions and module-level state. No framework, no build step.
 
-// ── Product Catalogue ──
-const PRODUCTS = [
-  {
-    id: 1, name: "PlayStation 5 Disc Edition", category: "consoles",
-    price: 499.99, originalPrice: 549.99, rating: 4.9, reviews: 12841,
-    ribbon: "hot", inStock: true,
-    image: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=600&q=85",
-    desc: "Experience lightning-fast loading with an ultra-high speed SSD, deeper immersion with the DualSense controller, and a whole new generation of incredible PlayStation games.",
-    specs: [["Storage","825GB SSD"],["CPU","AMD Zen 2 3.5GHz"],["GPU","AMD RDNA 2 10.28TF"],["RAM","16GB GDDR6"],["Resolution","Up to 8K"]]
-  },
-  {
-    id: 2, name: "Xbox Series X", category: "consoles",
-    price: 449.99, originalPrice: null, rating: 4.8, reviews: 9234,
-    ribbon: "new", inStock: true,
-    image: "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?w=600&q=85",
-    desc: "Xbox Series X is the fastest, most powerful Xbox ever. Play thousands of titles across four generations with Smart Delivery and up to 120 FPS gaming.",
-    specs: [["Storage","1TB NVMe SSD"],["CPU","AMD Zen 2 3.8GHz"],["GPU","AMD RDNA 2 12TF"],["RAM","16GB GDDR6"],["Resolution","Up to 8K"]]
-  },
-  {
-    id: 3, name: "Nintendo Switch OLED", category: "consoles",
-    price: 279.99, originalPrice: 349.99, rating: 4.7, reviews: 18302,
-    ribbon: "sale", inStock: true,
-    image: "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=600&q=85",
-    desc: "Featuring a vibrant 7-inch OLED screen, a wide adjustable stand, a dock with a wired LAN port, 64 GB internal storage, and enhanced audio.",
-    specs: [["Screen","7\" OLED"],["Storage","64GB"],["Battery","4.5–9 hrs"],["Weight","420g"],["Modes","TV, Tabletop, Handheld"]]
-  },
-  {
-    id: 4, name: "PS5 DualSense Edge Controller", category: "peripherals",
-    price: 199.99, originalPrice: 229.99, rating: 4.7, reviews: 4521,
-    ribbon: "sale", inStock: true,
-    image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600&q=85",
-    desc: "The DualSense Edge wireless controller is PlayStation's ultra-customizable controller that lets you tailor your setup for your personal playstyle.",
-    specs: [["Connection","USB-C / Wireless"],["Battery","~6 hrs"],["Compatibility","PS5, PC"],["Features","Haptic Feedback, Adaptive Triggers"],["Weight","325g"]]
-  },
-  {
-    id: 5, name: "SteelSeries Arctis Nova Pro", category: "peripherals",
-    price: 249.99, originalPrice: 299.99, rating: 4.8, reviews: 7102,
-    ribbon: "hot", inStock: true,
-    image: "https://images.unsplash.com/photo-1583394293253-4e8ccb4aefd9?w=600&q=85",
-    desc: "Premium gaming headset featuring hot-swappable battery system, premium hi-fi drivers, multiplatform compatibility, and active noise cancellation.",
-    specs: [["Drivers","40mm Neodymium"],["Frequency","10–40,000Hz"],["Connection","USB / 2.4GHz / BT"],["Mic","ClearCast Gen 2"],["Weight","338g"]]
-  },
-  {
-    id: 6, name: "Razer BlackWidow V4 Pro", category: "peripherals",
-    price: 229.99, originalPrice: 279.99, rating: 4.8, reviews: 3876,
-    ribbon: "sale", inStock: true,
-    image: "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&q=85",
-    desc: "A wireless mechanical gaming keyboard with Razer's iconic Green switches, a multi-function roller, and per-key RGB Chroma lighting in an all-metal build.",
-    specs: [["Switches","Razer Green Mechanical"],["Lighting","Per-Key RGB"],["Battery","200 hours"],["Connection","2.4GHz / Bluetooth / USB"],["Keys","110 Keys"]]
-  },
-  {
-    id: 7, name: "Logitech G Pro X Superlight 2", category: "peripherals",
-    price: 159.99, originalPrice: null, rating: 4.9, reviews: 11204,
-    ribbon: "hot", inStock: true,
-    image: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=600&q=85",
-    desc: "The lightest pro gaming mouse ever. Used by the world's top esports athletes. Ultra-lightweight at under 60g with HERO 25K sensor.",
-    specs: [["Sensor","HERO 25K"],["DPI","100–25,600"],["Weight","< 60g"],["Buttons","5 Programmable"],["Connection","2.4GHz Lightspeed"]]
-  },
-  {
-    id: 8, name: "Elden Ring Shadow of the Erdtree", category: "games",
-    price: 59.99, originalPrice: 79.99, rating: 4.9, reviews: 24532,
-    ribbon: "hot", inStock: true,
-    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&q=85",
-    desc: "Journey through a shattered world of awe-inspiring landscapes and dungeons in FromSoftware's critically acclaimed action RPG.",
-    specs: [["Platform","PS5, Xbox, PC"],["Genre","Action RPG"],["Players","1 + Co-op"],["Rating","M for Mature"],["Size","~60GB"]]
-  },
-  {
-    id: 9, name: "Cyberpunk 2077 Ultimate Edition", category: "games",
-    price: 49.99, originalPrice: 69.99, rating: 4.7, reviews: 18210,
-    ribbon: "sale", inStock: true,
-    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=85",
-    desc: "The complete Cyberpunk 2077 experience — the base game plus the Phantom Liberty expansion. A dark future open-world RPG set in Night City.",
-    specs: [["Platform","PS5, Xbox, PC"],["Genre","Action RPG"],["Players","Single Player"],["Rating","M for Mature"],["Size","~70GB"]]
-  },
-  {
-    id: 10, name: "Marvel's Spider-Man 2", category: "games",
-    price: 69.99, originalPrice: null, rating: 4.8, reviews: 15801,
-    ribbon: "new", inStock: true,
-    image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=85",
-    desc: "Be both Peter Parker and Miles Morales as they face the ultimate villain, Venom, in this critically acclaimed action-adventure sequel.",
-    specs: [["Platform","PS5 Exclusive"],["Genre","Action Adventure"],["Players","Single Player"],["Rating","T for Teen"],["Size","~98GB"]]
-  },
-  {
-    id: 11, name: "ASUS ROG Swift OLED 27\"", category: "monitors",
-    price: 799.99, originalPrice: 999.99, rating: 4.8, reviews: 2341,
-    ribbon: "sale", inStock: true,
-    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=600&q=85",
-    desc: "27\" QHD OLED gaming monitor with 240Hz refresh rate, 0.03ms response time, and true blacks. The ultimate competitive gaming display.",
-    specs: [["Panel","QHD OLED"],["Size","27 inch"],["Refresh","240Hz"],["Response","0.03ms"],["HDR","DisplayHDR True Black 400"]]
-  },
-  {
-    id: 12, name: "LG UltraGear 4K 144Hz", category: "monitors",
-    price: 599.99, originalPrice: null, rating: 4.6, reviews: 4102,
-    ribbon: "new", inStock: true,
-    image: "https://images.unsplash.com/photo-1593640408182-31c228132ee7?w=600&q=85",
-    desc: "32\" 4K UHD Nano IPS gaming monitor with VESA DisplayHDR 600, G-Sync Compatible and FreeSync Premium Pro for butter-smooth visuals.",
-    specs: [["Panel","4K Nano IPS"],["Size","32 inch"],["Refresh","144Hz"],["Response","1ms"],["HDR","DisplayHDR 600"]]
-  },
-  {
-    id: 13, name: "SecretLab TITAN Evo 2024", category: "chairs",
-    price: 529.00, originalPrice: 599.00, rating: 4.9, reviews: 8678,
-    ribbon: "hot", inStock: true,
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=85",
-    desc: "The ultimate ergonomic gaming chair with 4-way L-ADAPT lumbar support, magnetic memory foam head pillow, and premium NEO Hybrid Leatherette.",
-    specs: [["Material","NEO Hybrid Leatherette"],["Recline","85–165°"],["Armrests","4D"],["Weight Capacity","130kg"],["Size","Regular / XL"]]
-  },
-  {
-    id: 14, name: "Herman Miller x Logitech Embody", category: "chairs",
-    price: 1495.00, originalPrice: null, rating: 4.8, reviews: 1542,
-    ribbon: "lim", inStock: true,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=85",
-    desc: "Engineered specifically for gaming, combining Herman Miller's world-leading ergonomic design with Logitech G's gaming expertise.",
-    specs: [["Lumbar","Pixelated Support"],["Recline","94–104°"],["Seat Depth","Adjustable"],["Weight Capacity","136kg"],["Warranty","12 Years"]]
-  },
-  {
-    id: 15, name: "Corsair K100 RGB Wireless", category: "peripherals",
-    price: 249.99, originalPrice: 279.99, rating: 4.7, reviews: 2983,
-    ribbon: "sale", inStock: true,
-    image: "https://images.unsplash.com/photo-1595044426077-d36d9236d54a?w=600&q=85",
-    desc: "The pinnacle of keyboard innovation — optical-mechanical CORSAIR OPX switches, 24-zone per-key RGB, and up to 200 hours battery life.",
-    specs: [["Switches","OPX Optical-Mechanical"],["Battery","200 hours"],["Lighting","24-Zone RGB"],["Connection","2.4GHz / Bluetooth / USB"],["Keys","110 + iCUE Dial"]]
-  },
-  {
-    id: 16, name: "Xbox Series S + 3 Month Game Pass", category: "consoles",
-    price: 329.99, originalPrice: 369.99, rating: 4.6, reviews: 7201,
-    ribbon: "sale", inStock: true,
-    image: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=600&q=85",
-    desc: "Xbox Series S — the smallest, sleekest Xbox ever. Includes 3 months of Xbox Game Pass Ultimate for access to hundreds of games.",
-    specs: [["Storage","512GB NVMe SSD"],["Resolution","Up to 1440p"],["FPS","Up to 120"],["Game Pass","3 Months Included"],["Drive","All-Digital"]]
+   Two rules this file keeps, because the site runs under a strict CSP
+   (script-src 'self'; style-src 'self' — no 'unsafe-inline'):
+     1. No inline onclick="" in the HTML. Everything is wired through the
+        one delegated listener in initActions(), keyed on data-action.
+     2. No style="" attributes written into innerHTML. Dynamic values go
+        through el.style.setProperty(), which CSP allows.
+
+   Everything the server sends back is escaped with esc() before it is
+   interpolated into markup.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* Runs immediately, not on DOMContentLoaded: it must beat the first paint
+     so the reveal styles apply without content flashing in and back out. */
+  document.documentElement.classList.add('js');
+
+  var CAT = window.LOUVION_CATALOG;
+  var money = CAT.formatPrice;
+
+  /* ═══ STATE ═══ */
+
+  var CART_KEY = 'lv-cart';
+
+  var session = { user: null, csrfToken: null };
+  var cart = [];                       /* [{ boxId, qty, chocolates:[{id,qty}] }] */
+  var builder = { boxId: null, picks: {} };  /* picks: { chocolateId: qty } */
+  var adminData = { orders: [], stats: null, filter: 'all', query: '' };
+  var drawerMode = 'cart';             /* 'cart' | 'checkout' | 'done' */
+  var lastOrder = null;
+
+  /* ═══ UTIL ═══ */
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  /* Every piece of text that reaches innerHTML goes through this. */
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
-];
 
-// ── State ──
-let cart      = JSON.parse(localStorage.getItem('gx-cart')      || '[]');
-let wishlist  = JSON.parse(localStorage.getItem('gx-wishlist')  || '[]');
-let visibleCount = 8;
-let activeFilter = 'all';
-let modalQty = 1;
-let modalProductId = null;
-let countdownEnd = null;
+  /* Same as esc(), but keeps the line breaks in an address or gift note. */
+  function escMultiline(value) {
+    return esc(value).replace(/\n/g, '<br>');
+  }
 
-// ── Init ──
-document.addEventListener('DOMContentLoaded', () => {
-  initPreloader();
-  initCursor();
-  initNavbar();
-  initHamburger();
-  initSearch();
-  initCartDrawer();
-  initWishlistBtn();
-  initModalClose();
-  initBackToTop();
-  initReveal();
-  initFilterTabs();
-  renderProducts();
-  updateCartUI();
-  updateWishlistUI();
-  animateMetrics();
-  initCountdown();
-  initCanvas();
-});
+  function formatDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) +
+      ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
 
-/* ════════════════════════════════
-   PRELOADER
-════════════════════════════════ */
-function initPreloader() {
-  const el = document.getElementById('preloader');
-  const fill = document.getElementById('preloaderFill');
-  let pct = 0;
-  const iv = setInterval(() => {
-    pct += Math.random() * 18 + 5;
-    fill.style.width = Math.min(pct, 95) + '%';
-    if (pct >= 95) {
-      clearInterval(iv);
-      fill.style.width = '100%';
-      setTimeout(() => {
-        el.classList.add('hidden');
-        document.body.style.overflow = '';
-        triggerReveal();
-      }, 300);
+  function pluralPieces(n) { return n + (n === 1 ? ' piece' : ' pieces'); }
+
+  /* Mix a hex colour toward white (amt > 0) or black (amt < 0). */
+  function shade(hex, amt) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    var t = amt < 0 ? 0 : 255;
+    var p = Math.abs(amt);
+    r = Math.round((t - r) * p + r);
+    g = Math.round((t - g) * p + g);
+    b = Math.round((t - b) * p + b);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  /* ═══ API ═══ */
+
+  async function api(path, options) {
+    var opts = options || {};
+    var headers = { Accept: 'application/json' };
+    if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
+    if (session.csrfToken) headers['X-CSRF-Token'] = session.csrfToken;
+
+    var res;
+    try {
+      res = await fetch(path, {
+        method: opts.method || 'GET',
+        credentials: 'same-origin',
+        headers: headers,
+        body: opts.body === undefined ? undefined : JSON.stringify(opts.body)
+      });
+    } catch (err) {
+      throw new Error('Could not reach the server. Check your connection.');
     }
-  }, 120);
-  document.body.style.overflow = 'hidden';
-}
 
-/* ════════════════════════════════
-   CURSOR
-════════════════════════════════ */
-function initCursor() {
-  const c  = document.getElementById('cursor');
-  const cf = document.getElementById('cursorFollower');
-  if (!c || window.matchMedia('(pointer: coarse)').matches) return;
+    var data = {};
+    try { data = await res.json(); } catch (err) { data = {}; }
 
-  let mx = 0, my = 0, fx = 0, fy = 0;
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    c.style.left = mx + 'px'; c.style.top = my + 'px';
-  });
-
-  const animate = () => {
-    fx += (mx - fx) * 0.12;
-    fy += (my - fy) * 0.12;
-    cf.style.left = fx + 'px'; cf.style.top = fy + 'px';
-    requestAnimationFrame(animate);
-  };
-  animate();
-
-  document.querySelectorAll('a, button, [role="button"], .prod-card, .cat-hero, .cat-sm').forEach(el => {
-    el.addEventListener('mouseenter', () => { c.classList.add('hovered'); cf.classList.add('hovered'); });
-    el.addEventListener('mouseleave', () => { c.classList.remove('hovered'); cf.classList.remove('hovered'); });
-  });
-}
-
-/* ════════════════════════════════
-   CANVAS PARTICLES
-════════════════════════════════ */
-function initCanvas() {
-  const canvas = document.getElementById('heroCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-
-  const resize = () => {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  };
-  resize();
-  window.addEventListener('resize', resize);
-
-  class Particle {
-    constructor() { this.reset(); }
-    reset() {
-      this.x = Math.random() * canvas.width;
-      this.y = Math.random() * canvas.height;
-      this.size = Math.random() * 1.5 + 0.5;
-      this.speedX = (Math.random() - 0.5) * 0.3;
-      this.speedY = -Math.random() * 0.4 - 0.1;
-      this.opacity = Math.random() * 0.5 + 0.1;
-      this.color = Math.random() > 0.5 ? '99,102,241' : '6,182,212';
+    if (!res.ok) {
+      var e = new Error(data.error || 'Something went wrong.');
+      e.status = res.status;
+      throw e;
     }
-    update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
-      this.opacity -= 0.001;
-      if (this.opacity <= 0 || this.y < -10) this.reset();
-    }
-    draw() {
-      ctx.save();
-      ctx.globalAlpha = this.opacity;
-      ctx.fillStyle = `rgb(${this.color})`;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+    return data;
+  }
+
+  async function loadSession() {
+    try {
+      var data = await api('/api/auth/me');
+      session.user = data.user;
+      session.csrfToken = data.csrfToken;
+    } catch (err) {
+      session.user = null;
+      session.csrfToken = null;
     }
   }
 
-  for (let i = 0; i < 80; i++) particles.push(new Particle());
+  /* ═══ SVG ART ═══
+     The chocolates are drawn, not photographed: nothing loads from a
+     third party and the pieces stay crisp at any size. Colours come from
+     the catalogue entry, so a new flavour needs no new asset. */
 
-  const tick = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => { p.update(); p.draw(); });
-    requestAnimationFrame(tick);
-  };
-  tick();
-}
+  function chocolateSVG(c) {
+    var light = shade(c.base, 0.24);
+    var dark = shade(c.base, -0.28);
+    var gid = 'cg-' + c.id;
 
-/* ════════════════════════════════
-   NAVBAR
-════════════════════════════════ */
-function initNavbar() {
-  const nav = document.getElementById('navbar');
-  const links = document.querySelectorAll('.nav-link');
+    var defs =
+      '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0.35" y2="1">' +
+      '<stop offset="0" stop-color="' + light + '"/>' +
+      '<stop offset="0.55" stop-color="' + c.base + '"/>' +
+      '<stop offset="1" stop-color="' + dark + '"/>' +
+      '</linearGradient></defs>';
 
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 60);
+    var fill = 'url(#' + gid + ')';
+    var body = '';
 
-    // Active link on scroll
-    const sections = ['home','categories','products','deals','brands','contact'];
-    let current = '';
-    sections.forEach(id => {
-      const el = document.getElementById(id);
-      if (el && window.scrollY >= el.offsetTop - 120) current = id;
+    if (c.shape === 'dome') {
+      body =
+        '<ellipse cx="50" cy="73" rx="33" ry="8" fill="' + dark + '"/>' +
+        '<path d="M17 73 C17 38 30 22 50 22 C70 22 83 38 83 73 Z" fill="' + fill + '"/>' +
+        '<ellipse cx="38" cy="41" rx="9" ry="5" fill="#ffffff" opacity="0.22" transform="rotate(-30 38 41)"/>';
+    } else if (c.shape === 'round') {
+      body =
+        '<ellipse cx="50" cy="80" rx="27" ry="5" fill="' + dark + '" opacity="0.45"/>' +
+        '<circle cx="50" cy="51" r="30" fill="' + fill + '"/>' +
+        '<ellipse cx="39" cy="39" rx="9" ry="5.5" fill="#ffffff" opacity="0.2" transform="rotate(-30 39 39)"/>';
+    } else if (c.shape === 'square') {
+      body =
+        '<rect x="18" y="27" width="64" height="50" rx="6" fill="' + fill + '"/>' +
+        '<rect x="26" y="34" width="48" height="18" rx="3" fill="' + light + '" opacity="0.28"/>' +
+        '<rect x="18" y="70" width="64" height="7" rx="3" fill="' + dark + '" opacity="0.5"/>';
+    } else if (c.shape === 'oval') {
+      body =
+        '<ellipse cx="50" cy="78" rx="30" ry="5" fill="' + dark + '" opacity="0.45"/>' +
+        '<ellipse cx="50" cy="51" rx="34" ry="24" fill="' + fill + '"/>' +
+        '<ellipse cx="38" cy="42" rx="10" ry="5" fill="#ffffff" opacity="0.2" transform="rotate(-20 38 42)"/>';
+    } else {
+      body =
+        '<rect x="13" y="33" width="74" height="38" rx="5" fill="' + fill + '"/>' +
+        '<rect x="13" y="33" width="74" height="10" rx="5" fill="' + light + '" opacity="0.32"/>' +
+        '<g stroke="' + dark + '" stroke-width="1.6" opacity="0.5">' +
+        '<line x1="37" y1="37" x2="37" y2="67"/>' +
+        '<line x1="50" y1="37" x2="50" y2="67"/>' +
+        '<line x1="63" y1="37" x2="63" y2="67"/></g>';
+    }
+
+    var finish = '';
+    if (c.finish === 'drizzle') {
+      finish =
+        '<g fill="none" stroke="' + c.accent + '" stroke-width="2.8" stroke-linecap="round" opacity="0.92">' +
+        '<path d="M27 43 q9 -7 18 0 t18 0"/>' +
+        '<path d="M29 54 q9 -7 18 0 t18 0"/></g>';
+    } else if (c.finish === 'dust') {
+      finish =
+        '<g fill="' + c.accent + '" opacity="0.55">' +
+        '<circle cx="36" cy="38" r="1.8"/><circle cx="47" cy="33" r="1.4"/>' +
+        '<circle cx="59" cy="40" r="1.9"/><circle cx="42" cy="50" r="1.5"/>' +
+        '<circle cx="64" cy="53" r="1.5"/><circle cx="52" cy="59" r="1.7"/>' +
+        '<circle cx="33" cy="57" r="1.3"/></g>';
+    } else if (c.finish === 'nut') {
+      finish =
+        '<g transform="rotate(-18 50 40)">' +
+        '<ellipse cx="50" cy="40" rx="12" ry="7.5" fill="' + c.accent + '"/>' +
+        '<path d="M41 40 q9 -4.5 18 0" fill="none" stroke="' + shade(c.accent, -0.32) + '" stroke-width="1.3"/>' +
+        '</g>';
+    } else if (c.finish === 'shard') {
+      finish =
+        '<polygon points="38,38 51,29 49,45" fill="' + c.accent + '" opacity="0.95"/>' +
+        '<polygon points="54,42 67,36 60,50" fill="' + shade(c.accent, 0.16) + '" opacity="0.85"/>';
+    } else if (c.finish === 'gold') {
+      finish =
+        '<polygon points="44,33 58,28 63,38 49,44" fill="#d9b45c"/>' +
+        '<polygon points="48,35 57,31 60,37" fill="#f2dc9d" opacity="0.85"/>';
+    }
+
+    return '<svg class="choc-art" viewBox="0 0 100 100" role="img" aria-label="' +
+      esc(c.name) + '" focusable="false">' + defs + body + finish + '</svg>';
+  }
+
+  /* An open box seen from above, with the real piece count laid out in a
+     real grid — so a 9 and a 64 look as different as they are. */
+  var BOX_LAYOUT = { 3: 3, 9: 3, 16: 4, 64: 8 };
+  var BOX_TONES = ['#4a2d1c', '#6b4226', '#8a5a34', '#3a2317', '#a07a5c'];
+
+  function boxSVG(box) {
+    var cols = BOX_LAYOUT[box.pieces] || Math.ceil(Math.sqrt(box.pieces));
+    var rows = Math.ceil(box.pieces / cols);
+
+    var W = 200, H = 140;
+    var innerX = 16, innerY = 18, innerW = W - 32, innerH = H - 36;
+    var cell = Math.min(innerW / cols, innerH / rows);
+    var gridW = cell * cols, gridH = cell * rows;
+    var offX = innerX + (innerW - gridW) / 2;
+    var offY = innerY + (innerH - gridH) / 2;
+    var r = cell * 0.33;
+
+    var pieces = '';
+    for (var i = 0; i < box.pieces; i++) {
+      var cx = offX + (i % cols) * cell + cell / 2;
+      var cy = offY + Math.floor(i / cols) * cell + cell / 2;
+      var tone = BOX_TONES[i % BOX_TONES.length];
+      pieces +=
+        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) +
+        '" fill="' + tone + '"/>' +
+        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) +
+        '" r="' + (r * 0.28).toFixed(1) + '" fill="#ffffff" opacity="0.16"/>';
+    }
+
+    return '<svg class="box-card__art" viewBox="0 0 200 140" role="img" aria-label="' +
+      esc(box.name) + ', ' + box.pieces + ' pieces" focusable="false">' +
+      '<rect x="4" y="6" width="192" height="128" rx="7" fill="#3a2317"/>' +
+      '<rect x="10" y="12" width="180" height="116" rx="5" fill="#5a3722"/>' +
+      '<rect x="' + innerX + '" y="' + innerY + '" width="' + innerW + '" height="' + innerH +
+      '" rx="3" fill="#f3ece1"/>' +
+      pieces +
+      '</svg>';
+  }
+
+  /* ═══ TOAST ═══ */
+
+  function toast(message, kind) {
+    var host = $('#toasts');
+    if (!host) return;
+    var el = document.createElement('div');
+    el.className = 'toast' + (kind ? ' toast--' + kind : '');
+    el.setAttribute('role', 'status');
+    el.innerHTML = '<span class="toast__dot"></span><span>' + esc(message) + '</span>';
+    host.appendChild(el);
+    setTimeout(function () {
+      el.style.setProperty('opacity', '0');
+      setTimeout(function () { el.remove(); }, 220);
+    }, 3200);
+  }
+
+  /* ═══ HEADER ═══ */
+
+  function renderHeader() {
+    var adminLink = $('#navAdmin');
+    if (adminLink) adminLink.hidden = !(session.user && session.user.role === 'admin');
+
+    var accountLink = $('#navAccount');
+    if (accountLink) {
+      accountLink.textContent = session.user ? 'Account' : 'Sign in';
+    }
+  }
+
+  function initNavToggle() {
+    var toggle = $('#navToggle');
+    var nav = $('#nav');
+    if (!toggle || !nav) return;
+    toggle.addEventListener('click', function () {
+      var open = nav.classList.toggle('is-open');
+      toggle.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-    links.forEach(a => {
-      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-    });
-  }, { passive: true });
+  }
 
-  links.forEach(a => {
-    a.addEventListener('click', () => {
-      document.getElementById('mobileNav')?.classList.remove('open');
-    });
-  });
-}
+  /* ═══ CART ═══ */
 
-/* ════════════════════════════════
-   HAMBURGER
-════════════════════════════════ */
-function initHamburger() {
-  const btn  = document.getElementById('hamburger');
-  const menu = document.getElementById('mobileNav');
-  if (!btn || !menu) return;
-  btn.addEventListener('click', () => {
-    const open = menu.classList.toggle('open');
-    btn.classList.toggle('open', open);
-    btn.setAttribute('aria-expanded', open);
-    menu.setAttribute('aria-hidden', !open);
-  });
-  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    menu.classList.remove('open');
-    btn.classList.remove('open');
-  }));
-}
+  function loadCart() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+      if (!Array.isArray(raw)) { cart = []; return; }
+      /* Re-validate against the catalogue: a stale basket must never make
+         it as far as the server. */
+      cart = raw.filter(function (line) {
+        if (!line || typeof line !== 'object') return false;
+        var box = CAT.boxById(line.boxId);
+        if (!box) return false;
+        if (!Array.isArray(line.chocolates) || !line.chocolates.length) return false;
+        var total = 0;
+        for (var i = 0; i < line.chocolates.length; i++) {
+          var entry = line.chocolates[i];
+          if (!entry || !CAT.chocolateById(entry.id)) return false;
+          if (!Number.isInteger(entry.qty) || entry.qty < 1) return false;
+          total += entry.qty;
+        }
+        if (total !== box.pieces) return false;
+        return Number.isInteger(line.qty) && line.qty >= 1 && line.qty <= 20;
+      });
+    } catch (err) {
+      cart = [];
+    }
+  }
 
-/* ════════════════════════════════
-   SEARCH
-════════════════════════════════ */
-function initSearch() {
-  const toggle  = document.getElementById('searchToggle');
-  const bar     = document.getElementById('searchBar');
-  const input   = document.getElementById('searchInput');
-  const clear   = document.getElementById('searchClear');
-  const results = document.getElementById('searchResults');
-  if (!toggle) return;
+  function saveCart() {
+    try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (err) { /* private mode */ }
+    updateCartCount();
+  }
 
-  toggle.addEventListener('click', () => {
-    bar.classList.toggle('open');
-    if (bar.classList.contains('open')) { setTimeout(() => input.focus(), 100); }
-    else { input.value = ''; results.innerHTML = ''; results.style.display = 'none'; }
-  });
+  function cartCount() {
+    return cart.reduce(function (n, line) { return n + line.qty; }, 0);
+  }
 
-  clear.addEventListener('click', () => {
-    input.value = '';
-    results.innerHTML = '';
-    results.style.display = 'none';
-    input.focus();
-  });
+  function cartSubtotal() {
+    return cart.reduce(function (sum, line) {
+      var box = CAT.boxById(line.boxId);
+      return sum + (box ? box.price * line.qty : 0);
+    }, 0);
+  }
 
-  input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    if (!q) { results.style.display = 'none'; results.innerHTML = ''; return; }
+  function cartShipping() {
+    if (!cart.length) return 0;
+    return cartSubtotal() >= CAT.SHIPPING.freeOver ? 0 : CAT.SHIPPING.flat;
+  }
 
-    const hits = PRODUCTS.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
-    if (!hits.length) {
-      results.style.display = 'block';
-      results.innerHTML = `<div class="search-no-results">No products found for "${input.value}"</div>`;
+  function updateCartCount() {
+    var el = $('#cartCount');
+    if (!el) return;
+    var n = cartCount();
+    el.textContent = n;
+    el.classList.toggle('is-empty', n === 0);
+  }
+
+  function describeLine(line) {
+    return line.chocolates.map(function (entry) {
+      var choc = CAT.chocolateById(entry.id);
+      return (choc ? choc.name : entry.id) + ' ×' + entry.qty;
+    }).join(', ');
+  }
+
+  function openDrawer(mode) {
+    drawerMode = mode || 'cart';
+    renderDrawer();
+    $('#drawer').classList.add('is-open');
+    $('#scrim').classList.add('is-open');
+    $('#drawer').setAttribute('aria-hidden', 'false');
+    document.body.style.setProperty('overflow', 'hidden');
+  }
+
+  function closeDrawer() {
+    $('#drawer').classList.remove('is-open');
+    $('#scrim').classList.remove('is-open');
+    $('#drawer').setAttribute('aria-hidden', 'true');
+    document.body.style.removeProperty('overflow');
+    if (drawerMode === 'done') { drawerMode = 'cart'; lastOrder = null; }
+  }
+
+  function renderDrawer() {
+    var body = $('#drawerBody');
+    var foot = $('#drawerFoot');
+    var title = $('#drawerTitle');
+    if (!body) return;
+
+    if (drawerMode === 'done' && lastOrder) {
+      title.textContent = 'Order placed';
+      body.innerHTML =
+        '<div class="empty-state">' +
+        '<div class="empty-state__art">' + boxSVG({ name: 'Order', pieces: 9 }) + '</div>' +
+        '<div class="empty-state__title">Thank you — order ' + esc(lastOrder.id) + '</div>' +
+        '<p class="empty-state__text">We have your order and will confirm it by email at ' +
+        esc(lastOrder.customerEmail) + '. Total ' + esc(money(lastOrder.total)) + '.</p>' +
+        '</div>';
+      foot.innerHTML =
+        '<div class="panel-actions">' +
+        '<a class="btn btn--full" href="account.html">View my orders</a>' +
+        '<button class="btn btn--ghost btn--full" data-action="close-cart" type="button">Keep shopping</button>' +
+        '</div>';
       return;
     }
-    results.style.display = 'block';
-    results.innerHTML = hits.slice(0,6).map(p => `
-      <div class="search-result-item" onclick="openProduct(${p.id}); closeSearchBar()">
-        <div class="sr-img"><img src="${p.image}" alt="${p.name}" /></div>
-        <div class="sr-info">
-          <p class="sr-name">${p.name}</p>
-          <p class="sr-price">$${p.price.toFixed(2)}</p>
-        </div>
-      </div>
-    `).join('');
-  });
 
-  document.addEventListener('click', e => {
-    if (!bar.contains(e.target) && e.target !== toggle) {
-      bar.classList.remove('open');
-      results.style.display = 'none';
+    if (!cart.length) {
+      title.textContent = 'Your box';
+      body.innerHTML =
+        '<div class="empty-state">' +
+        '<div class="empty-state__art">' + boxSVG({ name: 'Empty box', pieces: 9 }) + '</div>' +
+        '<div class="empty-state__title">Nothing chosen yet</div>' +
+        '<p class="empty-state__text">Pick a box, then fill it with the pieces you want.</p>' +
+        '</div>';
+      foot.innerHTML = '<a class="btn btn--full" href="shop.html">Choose a box</a>';
+      return;
     }
-  });
-}
 
-function closeSearchBar() {
-  document.getElementById('searchBar')?.classList.remove('open');
-  document.getElementById('searchResults').style.display = 'none';
-}
+    if (drawerMode === 'checkout') {
+      title.textContent = 'Delivery details';
+      body.innerHTML =
+        '<div id="checkoutError" hidden></div>' +
+        '<form id="checkoutForm" novalidate>' +
+        '<div class="field"><label class="label" for="coRecipient">Recipient name</label>' +
+        '<input class="input" id="coRecipient" name="recipient" maxlength="80" autocomplete="name" value="' +
+        esc(session.user ? session.user.name : '') + '" required></div>' +
+        '<div class="field"><label class="label" for="coPhone">Contact number</label>' +
+        '<input class="input" id="coPhone" name="phone" maxlength="32" autocomplete="tel" required></div>' +
+        '<div class="field"><label class="label" for="coAddress">Delivery address</label>' +
+        '<textarea class="textarea" id="coAddress" name="address" maxlength="300" autocomplete="street-address" required></textarea></div>' +
+        '<div class="field"><label class="label" for="coNote">Gift note <span class="field-hint">(optional)</span></label>' +
+        '<textarea class="textarea" id="coNote" name="note" maxlength="400"></textarea></div>' +
+        '</form>';
 
-/* ════════════════════════════════
-   REVEAL ANIMATIONS
-════════════════════════════════ */
-function initReveal() {
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) {
-        setTimeout(() => e.target.classList.add('visible'), i * 80);
-        obs.unobserve(e.target);
+      foot.innerHTML =
+        '<div class="panel-row"><span>Subtotal</span><span>' + esc(money(cartSubtotal())) + '</span></div>' +
+        '<div class="panel-row"><span>Delivery</span><span>' +
+        (cartShipping() === 0 ? 'Free' : esc(money(cartShipping()))) + '</span></div>' +
+        '<div class="panel-row panel-row--total"><span>Total</span><strong>' +
+        esc(money(cartSubtotal() + cartShipping())) + '</strong></div>' +
+        '<div class="panel-actions">' +
+        '<button class="btn btn--full" type="submit" form="checkoutForm" id="placeBtn">Place order</button>' +
+        '<button class="btn btn--ghost btn--full" data-action="back-to-cart" type="button">Back</button>' +
+        '</div>';
+
+      var form = $('#checkoutForm');
+      if (form) form.addEventListener('submit', onPlaceOrder);
+      return;
+    }
+
+    title.textContent = 'Your box';
+    body.innerHTML = cart.map(function (line, index) {
+      var box = CAT.boxById(line.boxId);
+      return '<div class="cart-line">' +
+        '<div class="cart-line__art">' + boxSVG(box) + '</div>' +
+        '<div>' +
+        '<div class="cart-line__name">' + esc(box.name) + '</div>' +
+        '<div class="cart-line__meta">' + pluralPieces(box.pieces) + ' · quantity ' + line.qty + '</div>' +
+        '<div class="cart-line__contents">' + esc(describeLine(line)) + '</div>' +
+        '</div>' +
+        '<div class="cart-line__right">' +
+        '<div class="cart-line__price">' + esc(money(box.price * line.qty)) + '</div>' +
+        '<button class="text-btn" type="button" data-action="remove-line" data-index="' + index + '">Remove</button>' +
+        '</div></div>';
+    }).join('');
+
+    var ship = cartShipping();
+    foot.innerHTML =
+      '<div class="panel-row"><span>Subtotal</span><span>' + esc(money(cartSubtotal())) + '</span></div>' +
+      '<div class="panel-row"><span>Delivery</span><span>' +
+      (ship === 0 ? 'Free' : esc(money(ship))) + '</span></div>' +
+      '<div class="panel-row panel-row--total"><span>Total</span><strong>' +
+      esc(money(cartSubtotal() + ship)) + '</strong></div>' +
+      '<div class="panel-actions">' +
+      '<button class="btn btn--full" type="button" data-action="checkout">' +
+      (session.user ? 'Checkout' : 'Sign in to checkout') + '</button>' +
+      '<a class="btn btn--ghost btn--full" href="shop.html">Add another box</a>' +
+      '</div>';
+  }
+
+  async function onPlaceOrder(event) {
+    event.preventDefault();
+    var form = event.currentTarget;
+    var btn = $('#placeBtn');
+    var errorBox = $('#checkoutError');
+
+    function showError(message) {
+      errorBox.hidden = false;
+      errorBox.className = 'form-error';
+      errorBox.textContent = message;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Placing order…';
+    errorBox.hidden = true;
+
+    try {
+      var data = await api('/api/orders', {
+        method: 'POST',
+        body: {
+          items: cart,
+          recipient: form.recipient.value,
+          phone: form.phone.value,
+          address: form.address.value,
+          note: form.note.value
+        }
+      });
+      lastOrder = data.order;
+      cart = [];
+      saveCart();
+      drawerMode = 'done';
+      renderDrawer();
+      toast('Order ' + data.order.id + ' placed', 'ok');
+    } catch (err) {
+      if (err.status === 401) {
+        window.location.href = 'account.html?next=checkout';
+        return;
       }
-    });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => obs.observe(el));
-}
-
-function triggerReveal() {
-  document.querySelectorAll('.hero-left, .hero-right').forEach(el => {
-    setTimeout(() => el.classList.add('visible'), 100);
-  });
-}
-
-/* ════════════════════════════════
-   ANIMATED METRICS
-════════════════════════════════ */
-function animateMetrics() {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.querySelectorAll('.metric-num').forEach(el => {
-          const target = +el.dataset.target;
-          let cur = 0;
-          const step = target / 60;
-          const iv = setInterval(() => {
-            cur = Math.min(cur + step, target);
-            el.textContent = Math.floor(cur).toLocaleString();
-            if (cur >= target) clearInterval(iv);
-          }, 25);
-        });
-        obs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.5 });
-  const heroMetrics = document.querySelector('.hero-metrics');
-  if (heroMetrics) obs.observe(heroMetrics);
-}
-
-/* ════════════════════════════════
-   FILTER TABS
-════════════════════════════════ */
-function initFilterTabs() {
-  document.querySelectorAll('.filter-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-tab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
-      btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
-      activeFilter = btn.dataset.filter;
-      visibleCount = 8;
-      renderProducts();
-    });
-  });
-}
-
-function filterProducts(cat) {
-  activeFilter = cat;
-  visibleCount = 8;
-  document.querySelectorAll('.filter-tab').forEach(b => {
-    b.classList.toggle('active', b.dataset.filter === cat);
-  });
-  renderProducts();
-  document.getElementById('products').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-/* ════════════════════════════════
-   RENDER PRODUCTS
-════════════════════════════════ */
-function renderProducts() {
-  const grid = document.getElementById('productGrid');
-  const loadBtn = document.getElementById('loadMoreBtn');
-  const filtered = activeFilter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === activeFilter);
-  const visible = filtered.slice(0, visibleCount);
-
-  grid.innerHTML = visible.map(p => {
-    const inCart = cart.some(i => i.id === p.id);
-    const inWish = wishlist.includes(p.id);
-    const savings = p.originalPrice ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
-    return `
-      <article class="prod-card" onclick="openProduct(${p.id})">
-        <div class="prod-img-wrap">
-          <img
-            src="${p.image}"
-            alt="${p.name}"
-            loading="lazy"
-            onerror="this.src='https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80'"
-          />
-          ${p.ribbon ? `<span class="prod-ribbon r-${p.ribbon}">${ribbonLabel(p.ribbon)}</span>` : ''}
-          <div class="prod-actions">
-            <button class="prod-action-btn ${inWish ? 'wishlisted' : ''}"
-              onclick="event.stopPropagation(); toggleWishlist(${p.id})"
-              aria-label="${inWish ? 'Remove from wishlist' : 'Add to wishlist'}"
-              id="wish-${p.id}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="${inWish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </button>
-            <button class="prod-action-btn" onclick="event.stopPropagation(); openProduct(${p.id})" aria-label="Quick view">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="prod-info">
-          <div class="prod-meta">
-            <span class="prod-cat">${p.category}</span>
-            <span class="prod-rating-mini"><span class="star-fill">★</span> ${p.rating}</span>
-          </div>
-          <h3 class="prod-name">${p.name}</h3>
-          <div class="prod-footer">
-            <div class="prod-pricing">
-              ${p.originalPrice ? `<span class="prod-original">$${p.originalPrice.toFixed(2)}</span>` : ''}
-              <span class="prod-price">$${p.price.toFixed(2)}</span>
-            </div>
-            <button class="prod-atc ${inCart ? 'in-cart' : ''}" id="atc-${p.id}"
-              onclick="event.stopPropagation(); addToCart(${p.id})"
-              aria-label="Add to cart">
-              ${inCart
-                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
-                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
-              }
-            </button>
-          </div>
-        </div>
-      </article>
-    `;
-  }).join('');
-
-  if (loadBtn) loadBtn.style.display = filtered.length > visibleCount ? 'inline-flex' : 'none';
-}
-
-function ribbonLabel(r) {
-  return { hot:'🔥 Hot', new:'✦ New', sale:'Sale', lim:'Limited' }[r] || r;
-}
-
-function loadMore() {
-  visibleCount += 8;
-  renderProducts();
-}
-
-/* ════════════════════════════════
-   PRODUCT MODAL
-════════════════════════════════ */
-function openProduct(id) {
-  const p = PRODUCTS.find(x => x.id === id);
-  if (!p) return;
-  modalProductId = id;
-  modalQty = 1;
-
-  const savings = p.originalPrice ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
-  const inWish = wishlist.includes(p.id);
-  const inCart = cart.some(i => i.id === p.id);
-
-  document.getElementById('modalBody').innerHTML = `
-    <div class="modal-img">
-      <img src="${p.image}" alt="${p.name}" />
-    </div>
-    <div class="modal-info">
-      <p class="modal-cat">${p.category}</p>
-      <h2 class="modal-name">${p.name}</h2>
-      <div class="modal-rating">
-        <span class="modal-stars">${'★'.repeat(Math.floor(p.rating))}${ p.rating % 1 >= 0.5 ? '½' : ''}</span>
-        <span class="modal-reviews">${p.rating} · ${p.reviews.toLocaleString()} reviews</span>
-      </div>
-      <div class="modal-pricing">
-        ${p.originalPrice ? `<p class="modal-orig">Was $${p.originalPrice.toFixed(2)}</p>` : ''}
-        <span class="modal-price">$${p.price.toFixed(2)}</span>
-        ${savings ? `<span class="modal-save">Save ${savings}%</span>` : ''}
-      </div>
-      <div class="modal-divider"></div>
-      <p class="modal-desc">${p.desc}</p>
-      ${p.specs ? `
-        <div class="modal-specs">
-          <h4>Specifications</h4>
-          ${p.specs.map(([k,v]) => `<div class="spec-row"><span>${k}</span><span>${v}</span></div>`).join('')}
-        </div>
-      ` : ''}
-      <div class="modal-divider"></div>
-      <div class="modal-qty-section">
-        <span class="modal-qty-label">Quantity</span>
-        <div class="modal-qty-controls">
-          <button class="mq-btn" onclick="changeModalQty(-1)">−</button>
-          <span class="mq-num" id="modalQtyDisplay">1</span>
-          <button class="mq-btn" onclick="changeModalQty(1)">+</button>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-glow" onclick="addToCartFromModal()">
-          Add to Cart
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
-        </button>
-        <button class="btn btn-ghost ${inWish ? 'wishlisted-modal' : ''}" onclick="toggleWishlist(${p.id})" id="modalWishBtn" aria-label="Wishlist">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="${inWish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('productModal').classList.add('open');
-  document.getElementById('modalOverlay').classList.add('visible');
-  document.body.style.overflow = 'hidden';
-}
-
-function changeModalQty(d) {
-  modalQty = Math.max(1, Math.min(99, modalQty + d));
-  const el = document.getElementById('modalQtyDisplay');
-  if (el) el.textContent = modalQty;
-}
-
-function addToCartFromModal() {
-  if (!modalProductId) return;
-  addToCart(modalProductId, modalQty);
-  closeModal();
-}
-
-function initModalClose() {
-  document.getElementById('modalClose')?.addEventListener('click', closeModal);
-  document.getElementById('modalOverlay')?.addEventListener('click', closeModal);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeCart(); closeWishlist(); } });
-}
-
-function closeModal() {
-  document.getElementById('productModal').classList.remove('open');
-  document.getElementById('modalOverlay').classList.remove('visible');
-  if (!document.getElementById('cartDrawer').classList.contains('open')) {
-    document.body.style.overflow = '';
+      showError(err.message);
+      btn.disabled = false;
+      btn.textContent = 'Place order';
+    }
   }
-}
 
-/* ════════════════════════════════
-   CART
-════════════════════════════════ */
-function initCartDrawer() {
-  document.getElementById('cartBtn').addEventListener('click', openCart);
-  document.getElementById('drawerClose').addEventListener('click', closeCart);
-  document.getElementById('drawerOverlay').addEventListener('click', () => { closeCart(); closeWishlist(); });
-}
+  /* ═══ HOME ═══ */
 
-function openCart() {
-  renderCartItems();
-  document.getElementById('cartDrawer').classList.add('open');
-  document.getElementById('drawerOverlay').classList.add('visible');
-  document.body.style.overflow = 'hidden';
-}
+  function initHome() {
+    var art = $('#heroArt');
+    if (art) {
+      art.innerHTML = CAT.CHOCOLATES.slice(0, 9).map(function (c) {
+        return '<div>' + chocolateSVG(c) + '</div>';
+      }).join('');
+    }
 
-function closeCart() {
-  document.getElementById('cartDrawer').classList.remove('open');
-  if (!document.getElementById('wishlistDrawer').classList.contains('open')) {
-    document.getElementById('drawerOverlay').classList.remove('visible');
-    document.body.style.overflow = '';
+    var boxes = $('#homeBoxes');
+    if (boxes) {
+      boxes.innerHTML = CAT.BOXES.map(function (box) {
+        return '<a class="box-card reveal" href="shop.html?box=' + encodeURIComponent(box.id) + '">' +
+          '<span class="box-card__tag">' + esc(box.tag) + '</span>' +
+          boxSVG(box) +
+          '<div class="box-card__pieces">' + box.pieces + '<span>pieces</span></div>' +
+          '<h3 class="box-card__name">' + esc(box.name) + '</h3>' +
+          '<p class="box-card__desc">' + esc(box.desc) + '</p>' +
+          '<div class="box-card__foot">' +
+          '<span class="box-card__price">' + esc(money(box.price)) + '</span>' +
+          '<span class="box-card__cta">Fill this box →</span>' +
+          '</div></a>';
+      }).join('');
+    }
+
+    var collection = $('#homeCollection');
+    if (collection) {
+      collection.innerHTML = CAT.CHOCOLATES.map(function (c) {
+        return '<article class="choc-card reveal">' +
+          '<div class="choc-card__art">' + chocolateSVG(c) + '</div>' +
+          '<h3 class="choc-card__name">' + esc(c.name) + '</h3>' +
+          '<div class="choc-card__family">' + esc(c.family) + ' chocolate</div>' +
+          '<p class="choc-card__desc">' + esc(c.desc) + '</p>' +
+          '</article>';
+      }).join('');
+    }
   }
-}
 
-function addToCart(productId, qty = 1) {
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!p) return;
-  const existing = cart.find(i => i.id === productId);
-  if (existing) existing.qty += qty;
-  else cart.push({ id: p.id, qty });
-  saveCart();
-  updateCartUI();
-  renderProducts();
-  showToast('Added to Cart!', p.name, '🛒');
-}
+  /* ═══ SHOP ═══ */
 
-function removeFromCart(id) {
-  cart = cart.filter(i => i.id !== id);
-  saveCart();
-  updateCartUI();
-  renderCartItems();
-  renderProducts();
-}
-
-function changeQty(id, d) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty = Math.max(0, item.qty + d);
-  if (item.qty === 0) { removeFromCart(id); return; }
-  saveCart();
-  updateCartUI();
-  renderCartItems();
-}
-
-function saveCart() { localStorage.setItem('gx-cart', JSON.stringify(cart)); }
-
-function updateCartUI() {
-  const total = cart.reduce((s, i) => s + i.qty, 0);
-  document.getElementById('cartBadge').textContent = total;
-  document.getElementById('drawerCount').textContent = `(${total})`;
-}
-
-function renderCartItems() {
-  const list = document.getElementById('cartItemsList');
-  const empty = document.getElementById('cartEmptyState');
-  const footer = document.getElementById('drawerFooter');
-
-  if (!cart.length) {
-    list.innerHTML = '';
-    empty.style.display = 'block';
-    footer.style.display = 'none';
-    return;
+  function pickedTotal() {
+    return Object.keys(builder.picks).reduce(function (n, id) { return n + builder.picks[id]; }, 0);
   }
-  empty.style.display = 'none';
-  footer.style.display = 'block';
 
-  list.innerHTML = cart.map(item => {
-    const p = PRODUCTS.find(x => x.id === item.id);
-    if (!p) return '';
-    return `
-      <div class="cart-item-row">
-        <div class="ci-img"><img src="${p.image}" alt="${p.name}" /></div>
-        <div class="ci-details">
-          <p class="ci-cat">${p.category}</p>
-          <p class="ci-name">${p.name}</p>
-          <div class="ci-controls">
-            <button class="ci-qty-btn" onclick="changeQty(${p.id},-1)">−</button>
-            <span class="ci-qty">${item.qty}</span>
-            <button class="ci-qty-btn" onclick="changeQty(${p.id},1)">+</button>
-          </div>
-        </div>
-        <div class="ci-right">
-          <span class="ci-price">$${(p.price * item.qty).toFixed(2)}</span>
-          <button class="ci-remove" onclick="removeFromCart(${p.id})" aria-label="Remove">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
+  function selectBox(boxId) {
+    var box = CAT.boxById(boxId);
+    if (!box) return;
+    if (builder.boxId !== boxId) builder.picks = {};
+    builder.boxId = boxId;
+    renderShop();
+    var fill = $('#stepFill');
+    if (fill) fill.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
-  const sub = cart.reduce((s, i) => { const p = PRODUCTS.find(x => x.id === i.id); return s + (p ? p.price * i.qty : 0); }, 0);
-  const ship = sub >= 50 ? 0 : 9.99;
-  document.getElementById('summarySubtotal').textContent = '$' + sub.toFixed(2);
-  document.getElementById('summaryShipping').textContent = ship === 0 ? 'FREE' : '$' + ship.toFixed(2);
-  document.getElementById('summaryShipping').className = ship === 0 ? 'text-green' : '';
-  document.getElementById('summaryTotal').textContent  = '$' + (sub + ship).toFixed(2);
-}
+  function adjustPick(chocId, delta) {
+    var box = CAT.boxById(builder.boxId);
+    if (!box || !CAT.chocolateById(chocId)) return;
+    var current = builder.picks[chocId] || 0;
+    var next = current + delta;
+    if (next < 0) next = 0;
+    if (delta > 0 && pickedTotal() >= box.pieces) {
+      toast('That box is already full at ' + pluralPieces(box.pieces));
+      return;
+    }
+    if (next === 0) delete builder.picks[chocId];
+    else builder.picks[chocId] = next;
+    renderShop();
+  }
 
-function handleCheckout() {
-  if (!cart.length) return;
-  showToast('Order Placed!', 'Thank you for shopping with GamerX 🎮', '✅');
-  setTimeout(() => {
-    cart = [];
+  /* Round out a part-filled box evenly across what's already chosen —
+     or across the whole collection if nothing is. */
+  function fillRemaining() {
+    var box = CAT.boxById(builder.boxId);
+    if (!box) return;
+    var remaining = box.pieces - pickedTotal();
+    if (remaining <= 0) return;
+
+    var pool = Object.keys(builder.picks);
+    if (!pool.length) pool = CAT.CHOCOLATES.map(function (c) { return c.id; });
+
+    var i = 0;
+    while (remaining > 0) {
+      var id = pool[i % pool.length];
+      builder.picks[id] = (builder.picks[id] || 0) + 1;
+      remaining--;
+      i++;
+    }
+    renderShop();
+  }
+
+  function addBuilderToCart() {
+    var box = CAT.boxById(builder.boxId);
+    if (!box) return;
+    if (pickedTotal() !== box.pieces) {
+      toast('Choose exactly ' + pluralPieces(box.pieces) + ' first', 'bad');
+      return;
+    }
+
+    var chocolates = Object.keys(builder.picks).map(function (id) {
+      return { id: id, qty: builder.picks[id] };
+    });
+
+    /* Same box, same contents → bump the quantity rather than repeat it. */
+    var signature = JSON.stringify(chocolates.slice().sort(function (a, b) {
+      return a.id < b.id ? -1 : 1;
+    }));
+    var existing = cart.find(function (line) {
+      if (line.boxId !== box.id) return false;
+      return JSON.stringify(line.chocolates.slice().sort(function (a, b) {
+        return a.id < b.id ? -1 : 1;
+      })) === signature;
+    });
+
+    if (existing) existing.qty += 1;
+    else cart.push({ boxId: box.id, qty: 1, chocolates: chocolates });
+
     saveCart();
-    updateCartUI();
-    renderCartItems();
-    renderProducts();
-    closeCart();
-  }, 1200);
-}
-
-/* ════════════════════════════════
-   WISHLIST
-════════════════════════════════ */
-function initWishlistBtn() {
-  document.getElementById('wishlistBtn').addEventListener('click', openWishlist);
-}
-
-function toggleWishlist(id) {
-  const p = PRODUCTS.find(x => x.id === id);
-  if (!p) return;
-  const idx = wishlist.indexOf(id);
-  if (idx > -1) {
-    wishlist.splice(idx, 1);
-    showToast('Removed', `${p.name} removed from wishlist`, '🤍');
-  } else {
-    wishlist.push(id);
-    showToast('Wishlisted!', `${p.name} saved to wishlist`, '❤️');
+    builder.picks = {};
+    renderShop();
+    toast(box.name + ' added to your box', 'ok');
+    openDrawer('cart');
   }
-  localStorage.setItem('gx-wishlist', JSON.stringify(wishlist));
-  updateWishlistUI();
-  renderProducts();
-  // Update modal wish button if open
-  const mwb = document.getElementById('modalWishBtn');
-  if (mwb) {
-    const inWish = wishlist.includes(id);
-    mwb.querySelector('svg').setAttribute('fill', inWish ? 'currentColor' : 'none');
+
+  function renderShop() {
+    var grid = $('#boxGrid');
+    if (grid) {
+      grid.innerHTML = CAT.BOXES.map(function (box) {
+        return '<button class="box-card' + (builder.boxId === box.id ? ' is-selected' : '') +
+          '" type="button" data-action="select-box" data-box-id="' + esc(box.id) +
+          '" aria-pressed="' + (builder.boxId === box.id) + '">' +
+          '<span class="box-card__tag">' + esc(box.tag) + '</span>' +
+          boxSVG(box) +
+          '<span class="box-card__pieces">' + box.pieces + '<span>pieces</span></span>' +
+          '<h3 class="box-card__name">' + esc(box.name) + '</h3>' +
+          '<p class="box-card__desc">' + esc(box.desc) + '</p>' +
+          '<span class="box-card__foot">' +
+          '<span class="box-card__price">' + esc(money(box.price)) + '</span>' +
+          '<span class="box-card__each">' + esc(money(Math.round(box.price / box.pieces))) + ' a piece</span>' +
+          '</span></button>';
+      }).join('');
+    }
+
+    var fillSection = $('#stepFill');
+    if (!fillSection) return;
+
+    var box = CAT.boxById(builder.boxId);
+    fillSection.hidden = !box;
+    if (!box) return;
+
+    var total = pickedTotal();
+    var remaining = box.pieces - total;
+
+    var note = $('#fillNote');
+    if (note) {
+      note.textContent = remaining > 0
+        ? remaining + ' more to choose'
+        : 'Box full — ready to add';
+    }
+
+    var picker = $('#chocPicker');
+    if (picker) {
+      picker.innerHTML = CAT.CHOCOLATES.map(function (c) {
+        var qty = builder.picks[c.id] || 0;
+        return '<div class="picker-card' + (qty ? ' is-picked' : '') + '">' +
+          '<div class="picker-card__art">' + chocolateSVG(c) + '</div>' +
+          '<h3 class="picker-card__name">' + esc(c.name) + '</h3>' +
+          '<p class="picker-card__desc">' + esc(c.desc) + '</p>' +
+          '<div class="stepper">' +
+          '<button class="stepper__btn" type="button" data-action="choc-dec" data-choc-id="' +
+          esc(c.id) + '" aria-label="One fewer ' + esc(c.name) + '"' + (qty ? '' : ' disabled') + '>–</button>' +
+          '<span class="stepper__value">' + qty + '</span>' +
+          '<button class="stepper__btn" type="button" data-action="choc-inc" data-choc-id="' +
+          esc(c.id) + '" aria-label="One more ' + esc(c.name) + '"' +
+          (remaining <= 0 ? ' disabled' : '') + '>+</button>' +
+          '</div></div>';
+      }).join('');
+    }
+
+    var panelTitle = $('#panelTitle');
+    if (panelTitle) panelTitle.textContent = box.name;
+
+    var fillBar = $('#progressFill');
+    if (fillBar) fillBar.style.setProperty('--fill', Math.round((total / box.pieces) * 100) + '%');
+
+    var counter = $('#progressCount');
+    if (counter) counter.innerHTML = '<strong>' + total + '</strong> of ' + box.pieces + ' chosen';
+
+    var tray = $('#tray');
+    if (tray) {
+      var ids = Object.keys(builder.picks);
+      tray.innerHTML = ids.length
+        ? ids.map(function (id) {
+            var c = CAT.chocolateById(id);
+            var swatchId = 'sw-' + id;
+            return '<div class="tray__row">' +
+              '<span class="tray__swatch" id="' + esc(swatchId) + '"></span>' +
+              '<span class="tray__name">' + esc(c.name) + '</span>' +
+              '<span class="tray__qty">×' + builder.picks[id] + '</span>' +
+              '</div>';
+          }).join('')
+        : '<p class="tray__empty">Nothing chosen yet — tap + on any piece.</p>';
+
+      /* CSP forbids style="" in markup, so paint the swatches afterwards. */
+      ids.forEach(function (id) {
+        var swatch = document.getElementById('sw-' + id);
+        var c = CAT.chocolateById(id);
+        if (swatch && c) swatch.style.setProperty('background', c.base);
+      });
+    }
+
+    var priceRow = $('#panelPrice');
+    if (priceRow) priceRow.textContent = money(box.price);
+
+    var shipRow = $('#panelShipping');
+    if (shipRow) shipRow.textContent = 'Free over ' + money(CAT.SHIPPING.freeOver);
+
+    var addBtn = $('#addToCartBtn');
+    if (addBtn) {
+      addBtn.disabled = remaining !== 0;
+      addBtn.textContent = remaining === 0
+        ? 'Add to your box · ' + money(box.price)
+        : 'Choose ' + remaining + ' more';
+    }
+
+    var fillBtn = $('#fillRestBtn');
+    if (fillBtn) {
+      fillBtn.hidden = remaining <= 0;
+      fillBtn.textContent = "Fill the rest — chef's choice";
+    }
+
+    var clearBtn = $('#clearBtn');
+    if (clearBtn) clearBtn.hidden = total === 0;
   }
-}
 
-function updateWishlistUI() {
-  const dot = document.getElementById('wishlistDot');
-  const cnt = document.getElementById('wishlistCount');
-  if (dot) dot.style.display = wishlist.length ? 'block' : 'none';
-  if (cnt) cnt.textContent = `(${wishlist.length})`;
-}
-
-function openWishlist() {
-  renderWishlistItems();
-  document.getElementById('wishlistDrawer').classList.add('open');
-  document.getElementById('drawerOverlay').classList.add('visible');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeWishlist() {
-  document.getElementById('wishlistDrawer').classList.remove('open');
-  if (!document.getElementById('cartDrawer').classList.contains('open')) {
-    document.getElementById('drawerOverlay').classList.remove('visible');
-    document.body.style.overflow = '';
+  function initShop() {
+    var params = new URLSearchParams(window.location.search);
+    var wanted = params.get('box');
+    if (wanted && CAT.boxById(wanted)) builder.boxId = wanted;
+    renderShop();
+    if (params.get('checkout') === '1' && cart.length && session.user) openDrawer('checkout');
   }
-}
 
-function renderWishlistItems() {
-  const body = document.getElementById('wishlistBody');
-  if (!wishlist.length) {
-    body.innerHTML = `
-      <div class="cart-empty-state">
-        <div class="empty-illustration">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </div>
-        <h3>Wishlist is empty</h3>
-        <p>Save products you love by clicking the heart icon.</p>
-        <button class="btn btn-glow" onclick="closeWishlist()">Browse Products</button>
-      </div>
-    `;
-    return;
+  /* ═══ ACCOUNT ═══ */
+
+  function setAuthTab(tab) {
+    $$('.tab').forEach(function (btn) {
+      btn.classList.toggle('is-active', btn.dataset.tab === tab);
+      btn.setAttribute('aria-selected', btn.dataset.tab === tab ? 'true' : 'false');
+    });
+    $('#loginPanel').hidden = tab !== 'login';
+    $('#registerPanel').hidden = tab !== 'register';
+    $('#authError').hidden = true;
   }
-  body.innerHTML = wishlist.map(id => {
-    const p = PRODUCTS.find(x => x.id === id);
-    if (!p) return '';
-    return `
-      <div class="cart-item-row">
-        <div class="ci-img"><img src="${p.image}" alt="${p.name}" /></div>
-        <div class="ci-details">
-          <p class="ci-cat">${p.category}</p>
-          <p class="ci-name">${p.name}</p>
-          <button class="btn btn-glow" style="padding:7px 14px;font-size:10px;margin-top:8px" onclick="addToCart(${p.id}); closeWishlist()">Add to Cart</button>
-        </div>
-        <div class="ci-right">
-          <span class="ci-price">$${p.price.toFixed(2)}</span>
-          <button class="ci-remove" onclick="toggleWishlist(${p.id})" aria-label="Remove">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
 
-/* ════════════════════════════════
-   TOAST NOTIFICATIONS
-════════════════════════════════ */
-function showToast(title, msg, icon = '✦') {
-  const container = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.innerHTML = `
-    <span class="toast-icon">${icon}</span>
-    <div class="toast-text">
-      <p class="toast-title">${title}</p>
-      ${msg ? `<p class="toast-msg">${msg}</p>` : ''}
-    </div>
-    <button class="toast-close" onclick="removeToast(this.closest('.toast'))">✕</button>
-    <div class="toast-progress" id="tp-${Date.now()}"></div>
-  `;
-  container.appendChild(t);
-
-  const prog = t.querySelector('.toast-progress');
-  prog.style.transition = 'width 3s linear';
-  prog.style.width = '100%';
-  requestAnimationFrame(() => { prog.style.width = '0%'; });
-
-  const timeout = setTimeout(() => removeToast(t), 3200);
-  t._timeout = timeout;
-}
-
-function removeToast(el) {
-  if (!el) return;
-  clearTimeout(el._timeout);
-  el.classList.add('removing');
-  setTimeout(() => el.remove(), 300);
-}
-
-/* ════════════════════════════════
-   COUNTDOWN TIMER
-════════════════════════════════ */
-function initCountdown() {
-  const stored = localStorage.getItem('gx-deal-end');
-  if (stored && +stored > Date.now()) {
-    countdownEnd = +stored;
-  } else {
-    countdownEnd = Date.now() + (8 * 3600 + 45 * 60) * 1000;
-    localStorage.setItem('gx-deal-end', countdownEnd);
+  function authError(message) {
+    var box = $('#authError');
+    box.hidden = false;
+    box.className = 'form-error';
+    box.textContent = message;
   }
-  tickCountdown();
-  setInterval(tickCountdown, 1000);
-}
 
-function tickCountdown() {
-  const diff = Math.max(0, countdownEnd - Date.now());
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  const pad = n => String(n).padStart(2, '0');
-  const cdH = document.getElementById('cdH');
-  const cdM = document.getElementById('cdM');
-  const cdS = document.getElementById('cdS');
-  if (cdH) cdH.textContent = pad(h);
-  if (cdM) cdM.textContent = pad(m);
-  if (cdS) cdS.textContent = pad(s);
-}
+  function nextDestination() {
+    var next = new URLSearchParams(window.location.search).get('next');
+    if (next === 'admin') return 'admin.html';
+    if (next === 'checkout') return 'shop.html?checkout=1';
+    return null;
+  }
 
-/* ════════════════════════════════
-   NEWSLETTER
-════════════════════════════════ */
-function handleNewsletter(e) {
-  e.preventDefault();
-  const input = e.target.querySelector('input');
-  const email = input.value;
-  showToast('You\'re In!', `Welcome to the GamerX squad, ${email}`, '🎮');
-  input.value = '';
-}
+  async function afterAuth() {
+    var target = nextDestination();
+    if (target) { window.location.href = target; return; }
+    if (session.user && session.user.role === 'admin') { window.location.href = 'admin.html'; return; }
+    renderAccount();
+  }
 
-/* ════════════════════════════════
-   BACK TO TOP
-════════════════════════════════ */
-function initBackToTop() {
-  const btn = document.getElementById('backToTop');
-  if (!btn) return;
-  window.addEventListener('scroll', () => {
-    btn.classList.toggle('visible', window.scrollY > 400);
-  }, { passive: true });
-  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-}
+  async function onLogin(event) {
+    event.preventDefault();
+    var form = event.currentTarget;
+    var btn = $('#loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    $('#authError').hidden = true;
+
+    try {
+      var data = await api('/api/auth/login', {
+        method: 'POST',
+        body: { email: form.email.value, password: form.password.value }
+      });
+      session.user = data.user;
+      session.csrfToken = data.csrfToken;
+      renderHeader();
+      await afterAuth();
+    } catch (err) {
+      authError(err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  }
+
+  async function onRegister(event) {
+    event.preventDefault();
+    var form = event.currentTarget;
+    var btn = $('#registerBtn');
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+    $('#authError').hidden = true;
+
+    try {
+      var data = await api('/api/auth/register', {
+        method: 'POST',
+        body: {
+          name: form.name.value,
+          email: form.email.value,
+          password: form.password.value
+        }
+      });
+      session.user = data.user;
+      session.csrfToken = data.csrfToken;
+      renderHeader();
+      await afterAuth();
+    } catch (err) {
+      authError(err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    }
+  }
+
+  async function onLogout() {
+    try { await api('/api/auth/logout', { method: 'POST' }); } catch (err) { /* clearing anyway */ }
+    session.user = null;
+    session.csrfToken = null;
+    window.location.href = 'index.html';
+  }
+
+  function orderCardHTML(order) {
+    var lines = order.items.map(function (line) {
+      var chocs = line.chocolates.map(function (entry) {
+        return esc(entry.name) + ' ×' + entry.qty;
+      }).join(', ');
+      return '<div class="order-line">' +
+        '<span class="order-line__name">' + esc(line.boxName) + ' · ' +
+        pluralPieces(line.pieces) + (line.qty > 1 ? ' × ' + line.qty : '') + '</span>' +
+        '<span class="order-line__price">' + esc(money(line.lineTotal)) + '</span>' +
+        '<span class="order-line__chocs">' + chocs + '</span>' +
+        '</div>';
+    }).join('');
+
+    return '<article class="order-card">' +
+      '<div class="order-card__head">' +
+      '<div><div class="order-card__id">' + esc(order.id) + '</div>' +
+      '<div class="order-card__date">' + esc(formatDate(order.createdAt)) + '</div></div>' +
+      '<span class="badge badge--' + esc(order.status) + '">' + esc(order.status) + '</span>' +
+      '</div>' +
+      '<div class="order-card__body">' + lines + '</div>' +
+      '<div class="order-card__foot"><span>Delivery ' +
+      (order.shipping === 0 ? 'free' : esc(money(order.shipping))) +
+      '</span><span class="order-card__total">' + esc(money(order.total)) + '</span></div>' +
+      '</article>';
+  }
+
+  async function renderAccount() {
+    var authView = $('#authView');
+    var accountView = $('#accountView');
+
+    if (!session.user) {
+      authView.hidden = false;
+      accountView.hidden = true;
+      return;
+    }
+
+    authView.hidden = true;
+    accountView.hidden = false;
+    $('#accountName').textContent = session.user.name;
+    $('#accountEmail').textContent = session.user.email;
+
+    var isAdmin = session.user.role === 'admin';
+    var adminBadge = $('#accountAdminBadge');
+    if (adminBadge) adminBadge.hidden = !isAdmin;
+    var adminLink = $('#accountAdminLink');
+    if (adminLink) adminLink.hidden = !isAdmin;
+
+    var list = $('#orderList');
+    list.innerHTML = '<p class="tray__empty">Loading your orders…</p>';
+
+    try {
+      var data = await api('/api/orders');
+      list.innerHTML = data.orders.length
+        ? data.orders.map(orderCardHTML).join('')
+        : '<div class="empty-state"><div class="empty-state__title">No orders yet</div>' +
+          '<p class="empty-state__text">When you order a box it will appear here.</p>' +
+          '<p class="empty-state__text"><a class="link-quiet" href="shop.html">Browse the boxes</a></p></div>';
+    } catch (err) {
+      list.innerHTML = '<div class="form-error">' + esc(err.message) + '</div>';
+    }
+  }
+
+  function initAccount() {
+    var loginForm = $('#loginForm');
+    var registerForm = $('#registerForm');
+    if (loginForm) loginForm.addEventListener('submit', onLogin);
+    if (registerForm) registerForm.addEventListener('submit', onRegister);
+
+    if (new URLSearchParams(window.location.search).get('mode') === 'register') {
+      setAuthTab('register');
+    }
+    renderAccount();
+  }
+
+  /* ═══ ADMIN ═══ */
+
+  function matchesFilter(order) {
+    if (adminData.filter !== 'all' && order.status !== adminData.filter) return false;
+    if (!adminData.query) return true;
+    var q = adminData.query.toLowerCase();
+    return order.id.toLowerCase().indexOf(q) >= 0 ||
+      order.customerName.toLowerCase().indexOf(q) >= 0 ||
+      order.customerEmail.toLowerCase().indexOf(q) >= 0 ||
+      order.recipient.toLowerCase().indexOf(q) >= 0;
+  }
+
+  function renderAdmin() {
+    var stats = adminData.stats;
+    if (stats) {
+      $('#statOrders').textContent = stats.total;
+      $('#statRevenue').textContent = money(stats.revenue);
+      $('#statPending').textContent = stats.counts.pending + stats.counts.confirmed;
+      $('#statPieces').textContent = stats.pieces;
+    }
+
+    var rows = adminData.orders.filter(matchesFilter);
+    var body = $('#adminRows');
+
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="6"><div class="table-empty">' +
+        (adminData.orders.length ? 'No orders match this filter.' : 'No orders yet.') +
+        '</div></td></tr>';
+      return;
+    }
+
+    body.innerHTML = rows.map(function (order) {
+      var contents = order.items.map(function (line) {
+        return '<b>' + esc(line.boxName) + ' (' + line.pieces + ')' +
+          (line.qty > 1 ? ' × ' + line.qty : '') + '</b><br>' +
+          esc(line.chocolates.map(function (e) { return e.name + ' ×' + e.qty; }).join(', '));
+      }).join('<br><br>');
+
+      var options = CAT.ORDER_STATUSES.map(function (s) {
+        return '<option value="' + esc(s) + '"' + (s === order.status ? ' selected' : '') + '>' +
+          esc(s.charAt(0).toUpperCase() + s.slice(1)) + '</option>';
+      }).join('');
+
+      return '<tr>' +
+        '<td><div class="table__id">' + esc(order.id) + '</div>' +
+        '<div class="table__sub">' + esc(formatDate(order.createdAt)) + '</div></td>' +
+        '<td><div>' + esc(order.customerName) + '</div>' +
+        '<div class="table__sub">' + esc(order.customerEmail) + '</div></td>' +
+        '<td><div>' + esc(order.recipient) + '</div>' +
+        '<div class="table__sub">' + esc(order.phone) + '<br>' + escMultiline(order.address) +
+        (order.note ? '<br><em>Note: ' + escMultiline(order.note) + '</em>' : '') + '</div></td>' +
+        '<td><div class="table__contents">' + contents + '</div></td>' +
+        '<td><div class="table__total">' + esc(money(order.total)) + '</div>' +
+        '<div class="table__sub">' + (order.shipping === 0 ? 'free delivery' : esc(money(order.shipping)) + ' delivery') + '</div></td>' +
+        '<td><span class="badge badge--' + esc(order.status) + '">' + esc(order.status) + '</span>' +
+        '<select class="select select--status" data-order-id="' + esc(order.id) +
+        '" aria-label="Status for order ' + esc(order.id) + '">' + options + '</select></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  async function loadAdmin() {
+    try {
+      var data = await api('/api/admin/orders');
+      adminData.orders = data.orders;
+      adminData.stats = data.stats;
+      renderAdmin();
+    } catch (err) {
+      if (err.status === 403 || err.status === 401) {
+        window.location.href = 'account.html?next=admin';
+        return;
+      }
+      $('#adminRows').innerHTML =
+        '<tr><td colspan="6"><div class="table-empty">' + esc(err.message) + '</div></td></tr>';
+    }
+  }
+
+  async function onStatusChange(event) {
+    var select = event.target;
+    if (!select.matches('.select--status')) return;
+    var orderId = select.dataset.orderId;
+    var status = select.value;
+    select.disabled = true;
+
+    try {
+      var data = await api('/api/admin/orders/' + encodeURIComponent(orderId), {
+        method: 'PATCH',
+        body: { status: status }
+      });
+      var index = adminData.orders.findIndex(function (o) { return o.id === orderId; });
+      if (index >= 0) adminData.orders[index] = data.order;
+      await loadAdmin();
+      toast(orderId + ' → ' + status, 'ok');
+    } catch (err) {
+      toast(err.message, 'bad');
+      select.disabled = false;
+      await loadAdmin();
+    }
+  }
+
+  function initAdmin() {
+    if (!session.user || session.user.role !== 'admin') {
+      window.location.href = 'account.html?next=admin';
+      return;
+    }
+    $('#adminWho').textContent = session.user.email;
+
+    $('#adminRows').addEventListener('change', onStatusChange);
+
+    $('#filterStatus').addEventListener('change', function (event) {
+      adminData.filter = event.target.value;
+      renderAdmin();
+    });
+
+    var search = $('#filterSearch');
+    var timer = null;
+    search.addEventListener('input', function (event) {
+      clearTimeout(timer);
+      var value = event.target.value;
+      timer = setTimeout(function () {
+        adminData.query = value.trim();
+        renderAdmin();
+      }, 160);
+    });
+
+    $('#refreshBtn').addEventListener('click', function () {
+      loadAdmin();
+      toast('Orders refreshed');
+    });
+
+    loadAdmin();
+  }
+
+  /* ═══ ACTIONS (one delegated listener — no inline handlers) ═══ */
+
+  function initActions() {
+    document.addEventListener('click', function (event) {
+      var trigger = event.target.closest('[data-action]');
+      if (!trigger) return;
+      var action = trigger.dataset.action;
+
+      if (action === 'open-cart') { event.preventDefault(); openDrawer('cart'); }
+      else if (action === 'close-cart') { event.preventDefault(); closeDrawer(); }
+      else if (action === 'back-to-cart') { event.preventDefault(); openDrawer('cart'); }
+      else if (action === 'select-box') selectBox(trigger.dataset.boxId);
+      else if (action === 'choc-inc') adjustPick(trigger.dataset.chocId, 1);
+      else if (action === 'choc-dec') adjustPick(trigger.dataset.chocId, -1);
+      else if (action === 'fill-rest') fillRemaining();
+      else if (action === 'clear-picks') { builder.picks = {}; renderShop(); }
+      else if (action === 'add-to-cart') addBuilderToCart();
+      else if (action === 'remove-line') {
+        cart.splice(Number(trigger.dataset.index), 1);
+        saveCart();
+        renderDrawer();
+      }
+      else if (action === 'checkout') {
+        if (!session.user) { window.location.href = 'account.html?next=checkout'; return; }
+        openDrawer('checkout');
+      }
+      else if (action === 'logout') { event.preventDefault(); onLogout(); }
+      else if (action === 'auth-tab') setAuthTab(trigger.dataset.tab);
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        var drawer = $('#drawer');
+        if (drawer && drawer.classList.contains('is-open')) closeDrawer();
+      }
+    });
+  }
+
+  /* ═══ REVEAL ═══ */
+
+  function initReveal() {
+    var items = $$('.reveal');
+    if (!items.length) return;
+    if (!('IntersectionObserver' in window)) {
+      items.forEach(function (el) { el.classList.add('is-in'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0, rootMargin: '0px 0px 120px 0px' });
+    items.forEach(function (el) { observer.observe(el); });
+  }
+
+  /* ═══ INIT ═══ */
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    var page = document.body.dataset.page;
+
+    initActions();
+    initNavToggle();
+    loadCart();
+    updateCartCount();
+
+    await loadSession();
+    renderHeader();
+
+    if (page === 'home') initHome();
+    else if (page === 'shop') initShop();
+    else if (page === 'account') initAccount();
+    else if (page === 'admin') initAdmin();
+
+    initReveal();
+  });
+})();

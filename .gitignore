@@ -1,0 +1,9 @@
+# Runtime store: scrypt password hashes and real customer orders.
+# Never commit this — it is created on first run by server.js.
+data/
+
+# Atomic-write leftovers
+*.tmp
+
+node_modules/
+.DS_Store

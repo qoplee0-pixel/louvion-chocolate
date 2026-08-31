@@ -52,6 +52,21 @@ node server.js
 
 ### Vercel
 
+The quickest route is the dashboard — no terminal needed:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fqoplee0-pixel%2Fclaude%2Ftree%2Fclaude%2Flouvion-chocolate-store-mpwjju&env=LOUVION_ADMIN_PASSWORD&envDescription=Password%20for%20the%20studio%20(admin)%20account)
+
+1. Import the repo (the button pre-fills it), branch
+   `claude/louvion-chocolate-store-mpwjju`.
+2. **Storage → Create → Upstash Redis** → connect it. Vercel fills in
+   `KV_REST_API_URL` and `KV_REST_API_TOKEN` for you.
+3. Set `LOUVION_ADMIN_PASSWORD` to a long passphrase (the button prompts
+   for it).
+4. Deploy. Every push to the branch redeploys automatically.
+
+Or from a terminal:
+
+
 The API runs as a serverless function and the storage moves into Redis.
 Three steps:
 

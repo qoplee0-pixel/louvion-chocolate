@@ -1,11 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="A ribbon-tied Louvion gift box">
-<rect width="600" height="600" fill="#f3ece1"/>
-<ellipse cx="300" cy="470" rx="205" ry="28" fill="#3a2317" opacity="0.1"/>
-<rect x="95" y="205" width="410" height="255" rx="14" fill="#5a3722"/>
-<rect x="80" y="160" width="440" height="86" rx="12" fill="#3a2317"/>
-<rect x="272" y="160" width="56" height="300" fill="#b8893b"/>
-<rect x="80" y="330" width="440" height="52" fill="#b8893b" opacity="0.92"/>
-<path d="M300 160 C240 120 170 118 178 158 C184 190 258 172 300 160 Z" fill="#b8893b"/>
-<path d="M300 160 C360 120 430 118 422 158 C416 190 342 172 300 160 Z" fill="#b8893b"/>
-<circle cx="300" cy="158" r="20" fill="#a2762f"/>
+<defs>
+<radialGradient id="bg" cx="0.42" cy="0.36" r="0.78">
+  <stop offset="0" stop-color="#fdfaf4"/><stop offset="0.6" stop-color="#f7f1e6"/>
+  <stop offset="1" stop-color="#ece1cf"/>
+</radialGradient>
+<filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+  <feGaussianBlur stdDeviation="14"/>
+</filter>
+<filter id="tight" x="-40%" y="-40%" width="180%" height="180%">
+  <feGaussianBlur stdDeviation="5"/>
+</filter>
+</defs>
+<defs>
+<linearGradient id="base" x1="0" y1="0" x2="0.35" y2="1">
+  <stop offset="0" stop-color="#6b4226"/><stop offset="1" stop-color="#33200f"/></linearGradient>
+<linearGradient id="lid" x1="0" y1="0" x2="0.3" y2="1">
+  <stop offset="0" stop-color="#7d4f2c"/><stop offset="1" stop-color="#452a17"/></linearGradient>
+<linearGradient id="rib" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#e2c176"/><stop offset="0.45" stop-color="#b8893b"/>
+  <stop offset="1" stop-color="#8d6524"/></linearGradient>
+<linearGradient id="ribh" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#8d6524"/><stop offset="0.4" stop-color="#e2c176"/>
+  <stop offset="1" stop-color="#b8893b"/></linearGradient>
+</defs>
+<rect width="600" height="600" fill="url(#bg)"/>
+<ellipse cx="308" cy="512" rx="215" ry="32" fill="#3a2317" opacity="0.24" filter="url(#soft)"/>
+<rect x="88" y="248" width="424" height="238" rx="14" fill="url(#base)"/>
+<rect x="88" y="248" width="424" height="16" fill="#1f1309" opacity="0.35"/>
+<rect x="72" y="192" width="456" height="80" rx="12" fill="url(#lid)"/>
+<rect x="72" y="256" width="456" height="16" rx="6" fill="#2b1a0f" opacity="0.4"/>
+<rect x="272" y="192" width="58" height="294" fill="url(#ribh)"/>
+<rect x="72" y="356" width="456" height="52" fill="url(#rib)"/>
+<rect x="72" y="356" width="456" height="9" fill="#e2c176" opacity="0.75"/>
+<path d="M301 196 C238 138 150 132 158 186 C165 232 250 212 301 196 Z" fill="url(#rib)"/>
+<path d="M301 196 C364 138 452 132 444 186 C437 232 352 212 301 196 Z" fill="url(#rib)"/>
+<path d="M301 196 C258 168 205 158 190 178" fill="none" stroke="#8d6524" stroke-width="3" opacity="0.6"/>
+<path d="M301 196 C344 168 397 158 412 178" fill="none" stroke="#8d6524" stroke-width="3" opacity="0.6"/>
+<ellipse cx="301" cy="194" rx="27" ry="23" fill="#b8893b"/>
+<ellipse cx="294" cy="188" rx="12" ry="8" fill="#e2c176" opacity="0.8"/>
 </svg>

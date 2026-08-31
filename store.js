@@ -449,12 +449,24 @@ function redisBackend(kind, cmd) {
 /* ═══════════════════════ SELECTION ═══════════════════════ */
 
 function createStore() {
-  const redisUrl = process.env.REDIS_URL || process.env.REDIS_TLS_URL;
-  if (redisUrl) return redisBackend('redis', respTransport(redisUrl));
-
+  const nativeUrl = process.env.REDIS_URL || process.env.REDIS_TLS_URL || process.env.KV_URL;
   const httpUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const httpToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (httpUrl && httpToken) return redisBackend('kv', httpTransport(httpUrl, httpToken));
+  const hasHttp = httpUrl && httpToken;
+
+  /* Upstash's Vercel integration sets BOTH a native rediss:// URL and the
+     HTTP REST pair, so the order below decides which one is used.
+
+     On serverless, HTTP is the right transport: it's stateless, so it
+     survives cold starts and per-instance fan-out without holding a socket
+     open — which is exactly what a raw TCP connection can't do well on a
+     function. On a long-lived server the native socket is better (one
+     connection, no per-request HTTP overhead), so it wins there. */
+  const onServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+  if (onServerless && hasHttp) return redisBackend('kv', httpTransport(httpUrl, httpToken));
+  if (nativeUrl) return redisBackend('redis', respTransport(nativeUrl));
+  if (hasHttp) return redisBackend('kv', httpTransport(httpUrl, httpToken));
 
   return fileBackend();
 }

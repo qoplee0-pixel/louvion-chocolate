@@ -47,6 +47,43 @@ node server.js
 
 ## Deploying
 
+### Vercel
+
+```
+npx vercel          # preview URL
+npx vercel --prod   # production
+```
+
+`vercel.json` sets the same security headers the Node server sends, and
+`.vercelignore` keeps `data/` off the upload — that directory holds password
+hashes and customer addresses, and `vercel` uploads the working directory,
+so a local test run would otherwise publish it.
+
+**What you get is the storefront, not the shop.** Vercel serves these files
+statically, so there is no `/api/*`:
+
+| Works | Doesn't |
+| --- | --- |
+| Home, the collection, the gallery | Sign in and register |
+| Choosing a box and filling it | Checkout |
+| The basket (kept in `localStorage`) | Order history |
+| | The studio page |
+
+Anything needing the API shows a connection error. `admin.html` is still
+reachable as a file, but it holds no data of its own and redirects without a
+session — on the Node server that page isn't served to non-admins at all.
+
+To make checkout work on Vercel, the API has to become serverless functions
+**and** the storage has to move off disk. Vercel's filesystem is read-only
+apart from `/tmp`, which is per-instance and wiped between invocations, so
+`data/*.json` would silently lose orders and the in-memory session map would
+sign people out at random as requests land on different instances. That
+means a key-value store (Vercel KV, Upstash) for both sessions and orders.
+Both speak HTTP, so it can stay dependency-free — but it is a real change to
+`server.js`, not a config flag.
+
+### Anywhere that runs Node
+
 `server.js` needs a host that runs Node — Render, Railway, Fly.io, a VPS,
 anything. Put a TLS terminator (or a platform that provides HTTPS) in front
 of it: the session cookie only gets its `Secure` flag when the request

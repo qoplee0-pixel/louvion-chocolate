@@ -1,0 +1,12 @@
+# NEVER upload the runtime store — it holds scrypt password hashes and
+# real customer addresses. It is gitignored, but `vercel` uploads the
+# working directory, so a local data/ from `node server.js` would other-
+# wise be published. This line is the thing standing between a test run
+# and a public password-hash dump.
+data/
+
+# Docs and other hosts' config — no reason to ship them.
+README.md
+CLAUDE.md
+.netlify/
+.git/

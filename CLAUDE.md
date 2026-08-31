@@ -22,6 +22,8 @@ catalog.js    Boxes, chocolates, prices, delivery — read by BOTH sides
 app.js        All browser behaviour
 style.css     All styles
 server.js     Static files + JSON API + authentication
+store.js      Storage: JSON files locally, Redis over HTTP on serverless
+api/index.js  Vercel entry — hands /api/* to the same handler
 assets/       Gallery SVGs and favicon
 data/         Runtime store (users, orders). Gitignored. Never serve it.
 ```
@@ -61,14 +63,20 @@ or `server.js` — add it here and read it from both.
 
 ### `server.js`
 One file, Node built-ins only (`http`, `crypto`, `fs`, `path`). Sections are
-delimited by `/* ═══ NAME ═══ */` banners: CONFIG, STORAGE, CRYPTO, SESSIONS,
-RATE LIMITING, HTTP HELPERS, VALIDATION, AUTH PLUMBING, API ROUTES, STATIC
-FILES, SERVER, BOOTSTRAP.
+delimited by `/* ═══ NAME ═══ */` banners: CONFIG, CRYPTO, SESSIONS, RATE
+LIMITING, HTTP HELPERS, VALIDATION, AUTH PLUMBING, API ROUTES, STATIC FILES,
+REQUEST HANDLER, BOOTSTRAP.
 
 Routes are matched as `` `${method} ${pathname}` `` strings in `handleApi()`.
-Storage is JSON files under `data/`, written atomically through
-`mutateJson()` — always use it for read-modify-write so concurrent requests
-can't clobber each other.
+Everything that persists goes through `store.js` — see below.
+
+`handleRequest(req, res)` is the whole server; `node server.js` wraps it in
+`http.createServer` and `api/index.js` hands Vercel's requests to the same
+function. Anything added to one host is therefore live on both.
+
+`bootstrap()` runs once per process through `ensureBootstrap()` — at startup
+locally, on the first request of each cold serverless instance — so it has to
+stay idempotent.
 
 **When touching this file, keep these invariants:**
 - `role` is assigned by the server, never read from a request body.
@@ -77,6 +85,27 @@ can't clobber each other.
 - Errors thrown with a `status` below 500 have their message shown to the
   user; anything else surfaces as a generic message. Never leak a stack.
 - Auth failures return one identical message regardless of cause.
+
+### `store.js` — one interface, two backends
+Everything that persists goes through it: users, orders, sessions and
+rate-limit counters. The backend is chosen at startup from the env —
+`file` (JSON under `data/`, sessions and counters in memory) unless
+`KV_REST_API_URL` + `KV_REST_API_TOKEN` are set, then `kv` (Redis over its
+HTTP API, reached with `fetch`, so still no dependencies).
+
+The `kv` backend exists because serverless breaks both of the file
+backend's assumptions: the filesystem is read-only outside `/tmp`, and
+requests land on different instances, so an in-memory session map signs
+people out at random and an in-memory rate counter barely limits anything.
+
+**Never reach past this module** — no `fs` calls for app data in
+`server.js`. A change that only works on one backend is a bug: both are
+covered by the same test suite.
+
+- Registration uniqueness is `SET … NX` on `kv` and a queued
+  read-modify-write on `file`. Both are atomic; keep it that way.
+- Session expiry is Redis TTL on `kv` and an explicit timestamp check on
+  `file`. `server.js` checks the absolute deadline itself either way.
 
 ### `app.js`
 Plain functions and module-level state inside one IIFE — no classes, no

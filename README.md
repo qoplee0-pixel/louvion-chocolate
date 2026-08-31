@@ -44,43 +44,68 @@ node server.js
 | `LOUVION_ADMIN_EMAIL` | `admin@louvion.local` | Studio login |
 | `LOUVION_ADMIN_PASSWORD` | random, printed once | Studio password |
 | `LOUVION_FORCE_SECURE_COOKIES` | off | Force `Secure` cookies behind a proxy that doesn't set `X-Forwarded-Proto` |
+| `KV_REST_API_URL` | unset | Redis HTTP endpoint. Setting this and the token switches storage from `data/` to Redis. |
+| `KV_REST_API_TOKEN` | unset | Redis HTTP token. `UPSTASH_REDIS_REST_URL` / `_TOKEN` work too. |
 
 ## Deploying
 
 ### Vercel
 
+The API runs as a serverless function and the storage moves into Redis.
+Three steps:
+
+**1. Create a KV store.** In the Vercel dashboard: Storage → Create →
+Upstash Redis (Vercel KV works too, it is the same thing underneath).
+Connect it to the project. Vercel injects `KV_REST_API_URL` and
+`KV_REST_API_TOKEN` for you.
+
+**2. Set the admin password.** Project → Settings → Environment Variables:
+
 ```
-npx vercel          # preview URL
-npx vercel --prod   # production
+LOUVION_ADMIN_PASSWORD = <a long passphrase>
+LOUVION_ADMIN_EMAIL    = you@louvion.com     (optional)
 ```
 
-`vercel.json` sets the same security headers the Node server sends, and
-`.vercelignore` keeps `data/` off the upload — that directory holds password
-hashes and customer addresses, and `vercel` uploads the working directory,
-so a local test run would otherwise publish it.
+This one is required. On a long-running server an unset password gets
+generated and printed once; on serverless nobody is reading the log, so
+the server refuses to invent a secret that is immediately lost and just
+tells you to set it.
 
-**What you get is the storefront, not the shop.** Vercel serves these files
-statically, so there is no `/api/*`:
+**3. Deploy.**
 
-| Works | Doesn't |
-| --- | --- |
-| Home, the collection, the gallery | Sign in and register |
-| Choosing a box and filling it | Checkout |
-| The basket (kept in `localStorage`) | Order history |
-| | The studio page |
+```
+npx vercel --prod
+```
 
-Anything needing the API shows a connection error. `admin.html` is still
-reachable as a file, but it holds no data of its own and redirects without a
-session — on the Node server that page isn't served to non-admins at all.
+Everything works: sign-in, checkout, order history, the studio page.
 
-To make checkout work on Vercel, the API has to become serverless functions
-**and** the storage has to move off disk. Vercel's filesystem is read-only
-apart from `/tmp`, which is per-instance and wiped between invocations, so
-`data/*.json` would silently lose orders and the in-memory session map would
-sign people out at random as requests land on different instances. That
-means a key-value store (Vercel KV, Upstash) for both sessions and orders.
-Both speak HTTP, so it can stay dependency-free — but it is a real change to
-`server.js`, not a config flag.
+`api/index.js` hands `/api/*` to the same `handleRequest` that
+`node server.js` uses — one code path, two hosts. `vercel.json` rewrites
+`/api/(.*)` to it and sets the same security headers the Node server sends.
+`.vercelignore` keeps `data/` off the upload: it is gitignored, but the
+Vercel CLI uploads the working directory rather than the git tree, so a
+local test run would otherwise publish password hashes.
+
+If the KV variables are missing the deploy fails loudly at boot rather than
+appearing to work — see "Why serverless needs a store" below.
+
+### Why serverless needs a store
+
+Vercel's filesystem is read-only outside `/tmp`, and `/tmp` is per-instance
+and wiped between invocations. Requests also fan out across instances. So
+the file backend on serverless would have failed in two ways that are
+worse than an error, because both are silent:
+
+- **orders written and lost** — `data/orders.json` writes go nowhere durable
+- **random sign-outs** — an in-memory session map only exists on the one
+  instance that created it, so the next request doesn't recognise you
+
+`store.js` fixes both by keeping sessions, rate-limit counters, users and
+orders in Redis, reached over its HTTP API with `fetch` — so the project
+still has no npm dependencies. Redis' own TTL does session expiry, and
+`INCR`/`EXPIRE` makes rate limiting count across every instance instead of
+per-instance, which is the difference between a real login throttle and a
+decorative one.
 
 ### Anywhere that runs Node
 

@@ -88,10 +88,13 @@ stay idempotent.
 
 ### `store.js` — one interface, two backends
 Everything that persists goes through it: users, orders, sessions and
-rate-limit counters. The backend is chosen at startup from the env —
-`file` (JSON under `data/`, sessions and counters in memory) unless
-`KV_REST_API_URL` + `KV_REST_API_TOKEN` are set, then `kv` (Redis over its
-HTTP API, reached with `fetch`, so still no dependencies).
+rate-limit counters. The backend is chosen at startup from the env:
+`redis` (native Redis over a RESP socket) when `REDIS_URL` is set; else
+`kv` (Redis over the Upstash/Vercel HTTP API, reached with `fetch`) when
+`KV_REST_API_URL` + `KV_REST_API_TOKEN` are set; else `file` (JSON under
+`data/`, sessions and counters in memory). The two Redis backends share
+one set of operations and differ only in transport. Still no npm
+dependencies — the RESP client is built on `net`/`tls`.
 
 The `kv` backend exists because serverless breaks both of the file
 backend's assumptions: the filesystem is read-only outside `/tmp`, and

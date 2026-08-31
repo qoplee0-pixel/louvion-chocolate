@@ -844,10 +844,12 @@ async function bootstrap() {
   const email = normalizeEmail(process.env.LOUVION_ADMIN_EMAIL || 'admin@louvion.local');
   const supplied = process.env.LOUVION_ADMIN_PASSWORD;
 
-  /* A generated password only works if someone is watching the log. On
-     serverless nobody is, so there we insist on the env var rather than
+  /* A generated password only works if someone is watching the log. The
+     file and native-redis backends are run from a terminal, so printing
+     it once is fine. The kv (HTTP) backend is the serverless case where
+     nobody sees the log, so there we insist on the env var rather than
      invent a secret that is immediately lost. */
-  if (!supplied && store.kind !== 'file') {
+  if (!supplied && store.kind === 'kv') {
     console.warn('[bootstrap] No admin account and no LOUVION_ADMIN_PASSWORD set — set it and redeploy.');
     return;
   }

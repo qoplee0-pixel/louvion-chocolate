@@ -1,25 +1,34 @@
 /* ═══════════════════════════════════════════════════════════════════
    LOUVION — STORAGE
-   One interface, two backends, chosen at startup by what's in the env:
+   One interface, three backends, chosen at startup from the env:
 
-     file   JSON under data/, sessions and rate counters in memory.
-            The default. What `node server.js` uses.
+     file    JSON under data/, sessions and rate counters in memory.
+             The default. What `node server.js` uses out of the box.
 
-     kv     Redis over HTTP (Vercel KV / Upstash), sessions and rate
-            counters in Redis too. Used when KV_REST_API_URL and
-            KV_REST_API_TOKEN (or the UPSTASH_* pair) are set.
+     redis   A real Redis server over its native protocol (RESP), when
+             REDIS_URL is set (redis:// or rediss://). Redis Cloud,
+             Railway, Render, Upstash's redis:// endpoint, or a local
+             redis-server all work.
 
-   The kv backend exists because serverless breaks both of the file
-   backend's assumptions: the filesystem is read-only outside /tmp and
-   wiped between invocations, and each request may land on a different
-   instance — so an in-memory session map signs people out at random and
-   an in-memory rate counter barely limits anything.
+     kv      Redis over its HTTP API (Vercel KV / Upstash REST), when
+             KV_REST_API_URL + KV_REST_API_TOKEN are set. Handy on
+             serverless, where an outbound TCP socket is awkward but an
+             HTTPS fetch is not.
 
-   Still no npm dependencies: Redis' HTTP API is reached with fetch.
+   The redis and kv backends share ONE set of operations — they differ
+   only in how a command is sent. Redis exists because serverless breaks
+   both of the file backend's assumptions: the filesystem is read-only
+   outside /tmp, and requests land on different instances, so an in-memory
+   session map signs people out at random and an in-memory rate counter
+   barely limits anything.
+
+   Still no npm dependencies: the RESP client is built on `net`/`tls`,
+   the HTTP client on `fetch`.
    ═══════════════════════════════════════════════════════════════════ */
 'use strict';
 
-const crypto = require('crypto');
+const net = require('net');
+const tls = require('tls');
 const fsp = require('fs/promises');
 const path = require('path');
 
@@ -163,21 +172,164 @@ function fileBackend() {
   };
 }
 
-/* ═══════════════════════ KV BACKEND ═══════════════════════ */
+/* ═══════════════════════ NATIVE REDIS (RESP) ═══════════════════════ */
+/* A tiny RESP client over one persistent socket. Commands are awaited
+   one at a time and Redis replies in order, so a FIFO queue of resolvers
+   is all the bookkeeping needed. Built on `net`/`tls` — no dependencies. */
 
-function kvBackend(url, token) {
+function respTransport(urlString) {
+  const u = new URL(urlString);
+  const useTls = u.protocol === 'rediss:';
+  const host = u.hostname;
+  const port = Number(u.port) || 6379;
+  const username = u.username ? decodeURIComponent(u.username) : '';
+  const password = u.password ? decodeURIComponent(u.password) : '';
+  const db = u.pathname && u.pathname.length > 1 ? u.pathname.slice(1) : null;
+
+  let socket = null;
+  let connecting = null;
+  let buffer = Buffer.alloc(0);
+  const waiters = [];
+
+  /* Parse one reply starting at `offset`. Returns [value, nextOffset] or
+     null when the buffer doesn't yet hold a complete reply. */
+  function parseReply(buf, offset) {
+    if (offset >= buf.length) return null;
+    const type = buf[offset];
+    const nl = buf.indexOf('\r\n', offset);
+    if (nl === -1) return null;
+    const line = buf.toString('utf8', offset + 1, nl);
+    const after = nl + 2;
+
+    if (type === 0x2b) return [line, after];                 // +  simple string
+    if (type === 0x2d) return [new Error(line), after];      // -  error
+    if (type === 0x3a) return [Number(line), after];         // :  integer
+    if (type === 0x24) {                                     // $  bulk string
+      const len = Number(line);
+      if (len === -1) return [null, after];
+      const end = after + len;
+      if (end + 2 > buf.length) return null;
+      return [buf.toString('utf8', after, end), end + 2];
+    }
+    if (type === 0x2a) {                                     // *  array
+      const count = Number(line);
+      if (count === -1) return [null, after];
+      const arr = [];
+      let pos = after;
+      for (let i = 0; i < count; i++) {
+        const r = parseReply(buf, pos);
+        if (r === null) return null;
+        arr.push(r[0]);
+        pos = r[1];
+      }
+      return [arr, pos];
+    }
+    return null;
+  }
+
+  function onData(chunk) {
+    buffer = buffer.length ? Buffer.concat([buffer, chunk]) : chunk;
+    let offset = 0;
+    for (;;) {
+      const r = parseReply(buffer, offset);
+      if (r === null) break;
+      offset = r[1];
+      const waiter = waiters.shift();
+      if (waiter) {
+        if (r[0] instanceof Error) waiter.reject(r[0]);
+        else waiter.resolve(r[0]);
+      }
+    }
+    buffer = offset ? buffer.subarray(offset) : buffer;
+  }
+
+  function fail(err) {
+    if (socket) { socket.destroy(); socket = null; }
+    buffer = Buffer.alloc(0);
+    while (waiters.length) waiters.shift().reject(err);
+  }
+
+  function encode(args) {
+    let out = `*${args.length}\r\n`;
+    for (const a of args) {
+      const s = String(a);
+      out += `$${Buffer.byteLength(s)}\r\n${s}\r\n`;
+    }
+    return out;
+  }
+
+  /* Send a command straight onto the socket, bypassing connect() — used
+     for the AUTH/SELECT handshake before the socket is marked ready. */
+  function raw(sock, args) {
+    return new Promise((resolve, reject) => {
+      waiters.push({ resolve, reject });
+      sock.write(encode(args));
+    });
+  }
+
+  function connect() {
+    if (socket) return Promise.resolve();
+    if (connecting) return connecting;
+
+    connecting = new Promise((resolve, reject) => {
+      const sock = useTls
+        ? tls.connect({ host, port, servername: host })
+        : net.createConnection({ host, port });
+
+      sock.setNoDelay(true);
+      const onErr = (err) => { connecting = null; fail(err); reject(err); };
+      sock.once('error', onErr);
+      sock.setTimeout(10000, () => onErr(new Error('Redis connection timed out.')));
+
+      sock.on(useTls ? 'secureConnect' : 'connect', async () => {
+        sock.setTimeout(0);
+        sock.on('data', onData);
+        sock.on('error', (err) => fail(err));
+        sock.on('close', () => { if (socket === sock) socket = null; });
+        try {
+          if (password) {
+            await raw(sock, username ? ['AUTH', username, password] : ['AUTH', password]);
+          }
+          if (db) await raw(sock, ['SELECT', db]);
+          socket = sock;
+          connecting = null;
+          resolve();
+        } catch (err) {
+          connecting = null;
+          fail(err);
+          reject(err);
+        }
+      });
+    });
+    return connecting;
+  }
+
+  async function cmd(args) {
+    await connect();
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('Redis command timed out.')), 10000);
+      waiters.push({
+        resolve: (v) => { clearTimeout(timer); resolve(v); },
+        reject: (e) => { clearTimeout(timer); reject(e); }
+      });
+      socket.write(encode(args));
+    });
+  }
+
+  return cmd;
+}
+
+/* ═══════════════════════ HTTP REDIS (Upstash REST) ═══════════════════════ */
+
+function httpTransport(url, token) {
   const base = url.replace(/\/+$/, '');
-
-  async function cmd(command) {
+  return async function cmd(args) {
     let res;
     try {
       res = await fetch(base, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(command)
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(args)
       });
     } catch (err) {
       throw new Error('Storage unreachable.');
@@ -186,8 +338,13 @@ function kvBackend(url, token) {
     const data = await res.json();
     if (data && data.error) throw new Error('Storage error.');
     return data ? data.result : null;
-  }
+  };
+}
 
+/* ═══════════════════════ REDIS OPERATIONS ═══════════════════════ */
+/* Shared by both Redis transports. Only `cmd` differs between them. */
+
+function redisBackend(kind, cmd) {
   const K = {
     userByEmail: (email) => `lv:u:email:${email}`,
     userIdIndex: (id) => `lv:u:id:${id}`,
@@ -211,9 +368,16 @@ function kvBackend(url, token) {
   }
 
   return {
-    kind: 'kv',
+    kind,
 
-    async init() { /* nothing to create */ },
+    async init() {
+      /* Fail fast with a clear message if the store can't be reached,
+         rather than surfacing it on the first customer's request. */
+      const pong = await cmd(['PING']);
+      if (pong !== 'PONG' && pong !== 'pong') {
+        throw new Error('Redis did not answer PING.');
+      }
+    },
 
     users: {
       async byEmail(email) { return parse(await cmd(['GET', K.userByEmail(email)])); },
@@ -285,9 +449,13 @@ function kvBackend(url, token) {
 /* ═══════════════════════ SELECTION ═══════════════════════ */
 
 function createStore() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) return kvBackend(url, token);
+  const redisUrl = process.env.REDIS_URL || process.env.REDIS_TLS_URL;
+  if (redisUrl) return redisBackend('redis', respTransport(redisUrl));
+
+  const httpUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const httpToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (httpUrl && httpToken) return redisBackend('kv', httpTransport(httpUrl, httpToken));
+
   return fileBackend();
 }
 

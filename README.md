@@ -44,8 +44,9 @@ node server.js
 | `LOUVION_ADMIN_EMAIL` | `admin@louvion.local` | Studio login |
 | `LOUVION_ADMIN_PASSWORD` | random, printed once | Studio password |
 | `LOUVION_FORCE_SECURE_COOKIES` | off | Force `Secure` cookies behind a proxy that doesn't set `X-Forwarded-Proto` |
-| `KV_REST_API_URL` | unset | Redis HTTP endpoint. Setting this and the token switches storage from `data/` to Redis. |
-| `KV_REST_API_TOKEN` | unset | Redis HTTP token. `UPSTASH_REDIS_REST_URL` / `_TOKEN` work too. |
+| `REDIS_URL` | unset | Native Redis (`redis://` or `rediss://`). Setting it switches storage from `data/` to Redis. `REDIS_TLS_URL` also works. |
+| `KV_REST_API_URL` | unset | Redis over HTTP (Vercel KV / Upstash REST). Setting this and the token switches storage to Redis over HTTP. |
+| `KV_REST_API_TOKEN` | unset | HTTP token for the above. `UPSTASH_REDIS_REST_URL` / `_TOKEN` work too. |
 
 ## Deploying
 
@@ -88,6 +89,26 @@ local test run would otherwise publish password hashes.
 
 If the KV variables are missing the deploy fails loudly at boot rather than
 appearing to work — see "Why serverless needs a store" below.
+
+### Any host with Redis
+
+If you are deploying somewhere that runs a long-lived Node process (a VPS,
+Railway, Render, Fly.io, a container) rather than serverless functions,
+point it at a Redis instance and run the normal server:
+
+```
+REDIS_URL=redis://default:password@host:6379 \
+LOUVION_ADMIN_PASSWORD='a long passphrase' \
+node server.js
+```
+
+`rediss://` (TLS) works too, as do the `REDIS_TLS_URL` name and a `/0`
+database suffix. This talks to Redis over its native protocol — a small
+RESP client built on a TCP socket, so still no npm dependencies. Redis
+Cloud, Railway Redis, Upstash's `redis://` endpoint, or a self-hosted
+`redis-server` all work. State (users, orders, sessions, rate counters)
+lives in Redis, so you can run more than one instance behind a load
+balancer and sessions still hold.
 
 ### Why serverless needs a store
 

@@ -824,17 +824,17 @@ function ensureBootstrap() {
 }
 
 async function bootstrap() {
-  /* Without this the failure is a read-only-filesystem error buried in a
-     500, which tells you nothing. Vercel plus the file backend means the
-     KV variables never got set. */
-  if (process.env.VERCEL && store.kind === 'file') {
-    console.error(
-      '[bootstrap] Running on Vercel with no KV store configured.\n' +
-      '            Set KV_REST_API_URL and KV_REST_API_TOKEN (Storage tab),\n' +
-      '            otherwise orders are written to a read-only filesystem\n' +
-      '            and sessions do not survive between instances.'
+  /* Ephemeral memory mode: the site runs, but nothing persists reliably.
+     Loud on purpose so it's obvious in the logs that a real store is
+     needed for production. The site still boots — connecting Redis
+     upgrades it automatically. */
+  if (store.kind === 'memory') {
+    console.warn(
+      '[bootstrap] No database configured — running in EPHEMERAL memory mode.\n' +
+      '            The site works, but orders and accounts are NOT saved and\n' +
+      '            vanish between requests. Connect Redis for real use:\n' +
+      '            add KV_REST_API_URL + KV_REST_API_TOKEN (or REDIS_URL).'
     );
-    throw new Error('Storage is not configured.');
   }
 
   await store.init();

@@ -172,6 +172,84 @@ function fileBackend() {
   };
 }
 
+/* ═══════════════════════ MEMORY BACKEND ═══════════════════════ */
+/* Everything in process memory, nothing on disk or over a socket. Used
+   as the last-resort fallback on serverless when no Redis is configured,
+   so the site still RUNS (loads, register, checkout) instead of refusing
+   to boot. The catch: state lives only in one function instance and is
+   wiped between cold starts, so orders don't persist reliably. It's a
+   demo mode — connect Redis (KV_REST_API_URL / REDIS_URL) for real use,
+   and the store upgrades itself automatically. */
+
+function memoryBackend() {
+  const users = [];
+  const orders = [];
+  const sessions = new Map();
+  const buckets = new Map();
+
+  setInterval(() => {
+    const now = Date.now();
+    for (const [t, s] of sessions) if (now > s.expiresAt) sessions.delete(t);
+    for (const [k, b] of buckets) if (now > b.resetAt) buckets.delete(k);
+  }, 1000 * 60 * 5).unref();
+
+  return {
+    kind: 'memory',
+    async init() {},
+
+    users: {
+      async byEmail(email) { return users.find((u) => u.email === email) || null; },
+      async byId(id) { return users.find((u) => u.id === id) || null; },
+      async hasAdmin() { return users.some((u) => u.role === 'admin'); },
+      async create(user) {
+        if (users.some((u) => u.email === user.email)) return false;
+        users.push(user);
+        return true;
+      }
+    },
+
+    orders: {
+      async add(order) { orders.unshift(order); },
+      async forUser(userId) { return orders.filter((o) => o.userId === userId); },
+      async all() { return orders.slice(); },
+      async update(id, mutator) {
+        const order = orders.find((o) => o.id === id);
+        if (!order) return null;
+        mutator(order);
+        return order;
+      }
+    },
+
+    sessions: {
+      async get(token) {
+        const s = sessions.get(token);
+        if (!s) return null;
+        if (Date.now() > s.expiresAt) { sessions.delete(token); return null; }
+        return s.value;
+      },
+      async set(token, value, ttlSeconds) {
+        sessions.set(token, { value, expiresAt: Date.now() + ttlSeconds * 1000 });
+      },
+      async del(token) { sessions.delete(token); }
+    },
+
+    rate: {
+      async hit(key, limit, windowSeconds) {
+        const now = Date.now();
+        const b = buckets.get(key);
+        if (!b || now > b.resetAt) {
+          buckets.set(key, { count: 1, resetAt: now + windowSeconds * 1000 });
+          return { ok: true, retryAfter: 0 };
+        }
+        b.count += 1;
+        if (b.count > limit) return { ok: false, retryAfter: Math.ceil((b.resetAt - now) / 1000) };
+        return { ok: true, retryAfter: 0 };
+      },
+      async clear(key) { buckets.delete(key); }
+    }
+  };
+}
+
 /* ═══════════════════════ NATIVE REDIS (RESP) ═══════════════════════ */
 /* A tiny RESP client over one persistent socket. Commands are awaited
    one at a time and Redis replies in order, so a FIFO queue of resolvers
@@ -468,6 +546,10 @@ function createStore() {
   if (nativeUrl) return redisBackend('redis', respTransport(nativeUrl));
   if (hasHttp) return redisBackend('kv', httpTransport(httpUrl, httpToken));
 
+  /* On serverless the disk is read-only, so the file backend can't run
+     there — fall back to ephemeral memory so the site still boots. On a
+     normal machine, the file backend under data/ is the right default. */
+  if (onServerless) return memoryBackend();
   return fileBackend();
 }
 

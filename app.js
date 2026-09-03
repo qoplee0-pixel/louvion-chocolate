@@ -123,6 +123,13 @@
 
   var DOME = 'M17 73 C17 38 30 21 50 21 C70 21 83 38 83 73 Z';
 
+  /* Real product photo for a chocolate, cropped square in assets/chocolates/.
+     Kept a plain <img> under the strict CSP (img-src 'self'). */
+  function chocImg(c) {
+    return '<img class="choc-photo" src="assets/chocolates/' + esc(c.id) + '.jpg" alt="' +
+      esc(c.name) + '" loading="lazy" width="600" height="600" />';
+  }
+
   function chocolateSVG(c) {
     var light = shade(c.base, 0.32);
     var dark = shade(c.base, -0.38);
@@ -508,7 +515,7 @@
     var art = $('#heroArt');
     if (art) {
       art.innerHTML = CAT.CHOCOLATES.slice(0, 9).map(function (c) {
-        return '<div>' + chocolateSVG(c) + '</div>';
+        return '<div class="hero__cell">' + chocImg(c) + '</div>';
       }).join('');
     }
 
@@ -532,7 +539,7 @@
     if (collection) {
       collection.innerHTML = CAT.CHOCOLATES.map(function (c) {
         return '<article class="choc-card reveal">' +
-          '<div class="choc-card__art">' + chocolateSVG(c) + '</div>' +
+          '<div class="choc-card__photo">' + chocImg(c) + '</div>' +
           '<h3 class="choc-card__name">' + esc(c.name) + '</h3>' +
           '<div class="choc-card__family" dir="rtl" lang="ar">' + esc(c.nameAr) + '</div>' +
           '<p class="choc-card__desc">' + esc(c.desc) + '</p>' +
@@ -667,7 +674,7 @@
       picker.innerHTML = CAT.CHOCOLATES.map(function (c) {
         var qty = builder.picks[c.id] || 0;
         return '<div class="picker-card' + (qty ? ' is-picked' : '') + '">' +
-          '<div class="picker-card__art">' + chocolateSVG(c) + '</div>' +
+          '<div class="picker-card__photo">' + chocImg(c) + '</div>' +
           '<h3 class="picker-card__name">' + esc(c.name) + '</h3>' +
           '<div class="picker-card__ar" dir="rtl" lang="ar">' + esc(c.nameAr) + '</div>' +
           '<p class="picker-card__desc">' + esc(c.desc) + '</p>' +

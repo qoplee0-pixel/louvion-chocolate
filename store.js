@@ -401,13 +401,18 @@ function respTransport(urlString) {
 
 function httpTransport(url, token) {
   const base = url.replace(/\/+$/, '');
+  /* Bound every request so a stuck connection fails cleanly instead of
+     hanging until the serverless function's own execution limit, which
+     would surface as an opaque crash rather than a readable error. */
+  const HTTP_TIMEOUT_MS = 7000;
   return async function cmd(args) {
     let res;
     try {
       res = await fetch(base, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(args)
+        body: JSON.stringify(args),
+        signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
       });
     } catch (err) {
       throw new Error('Storage unreachable.');
@@ -524,6 +529,68 @@ function redisBackend(kind, cmd) {
   };
 }
 
+/* ═══════════════════════ SERVERLESS RESILIENCE ═══════════════════════ */
+
+/* Resolve/reject with `promise`, but never wait past `ms`. The original
+   promise keeps running; its late settlement is swallowed so a slow socket
+   that eventually errors can't raise an unhandled rejection after we've
+   already moved on. */
+function withTimeout(promise, ms) {
+  promise.catch(() => {});
+  let timer;
+  const guard = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms);
+    timer.unref && timer.unref();
+  });
+  return Promise.race([promise, guard]).finally(() => clearTimeout(timer));
+}
+
+/* On serverless a misconfigured or unreachable Redis must never take the
+   whole site down. A raw socket that can't connect blocks until its own
+   timeout — long enough to blow past a function's execution limit, which
+   surfaces as an opaque FUNCTION_INVOCATION_FAILED and, because bootstrap
+   gates every route, takes the static pages down with it too.
+
+   This wrapper bounds init() to a budget well under that limit and, if the
+   store can't be reached in time, degrades to an in-process memory backend
+   so the site still boots. Persistence is lost until the real store is
+   reachable again — loud in the log, never fatal — which matches the
+   bootstrap contract: connecting Redis upgrades it automatically. */
+function serverlessResilient(primary, label) {
+  const INIT_BUDGET_MS = 5000;
+  let active = primary;
+
+  const store = {
+    get kind() { return active.kind; },
+    async init() {
+      try {
+        await withTimeout(primary.init(), INIT_BUDGET_MS);
+      } catch (err) {
+        console.warn(
+          `[store] ${label} store unreachable (${err.message}) — falling back to\n` +
+          '        EPHEMERAL memory mode so the site still boots. Orders and\n' +
+          '        accounts will NOT persist until storage is reachable. Check\n' +
+          '        the Redis URL / credentials in the deployment environment.'
+        );
+        active = memoryBackend();
+        await active.init();
+        rebind();
+      }
+    }
+  };
+
+  /* Point the data namespaces (users, orders, sessions, rate) at whichever
+     backend is live, without hardcoding their names. */
+  function rebind() {
+    for (const key of Object.keys(active)) {
+      if (key === 'kind' || key === 'init') continue;
+      store[key] = active[key];
+    }
+  }
+  rebind();
+  return store;
+}
+
 /* ═══════════════════════ SELECTION ═══════════════════════ */
 
 function createStore() {
@@ -542,8 +609,17 @@ function createStore() {
      connection, no per-request HTTP overhead), so it wins there. */
   const onServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
 
-  if (onServerless && hasHttp) return redisBackend('kv', httpTransport(httpUrl, httpToken));
-  if (nativeUrl) return redisBackend('redis', respTransport(nativeUrl));
+  /* On serverless, wrap the chosen Redis backend so an unreachable store
+     degrades to memory instead of hanging the function to death. On a
+     long-lived server a storage outage should still fail loudly at startup,
+     so the wrapper is serverless-only. */
+  if (onServerless && hasHttp) {
+    return serverlessResilient(redisBackend('kv', httpTransport(httpUrl, httpToken)), 'kv');
+  }
+  if (nativeUrl) {
+    const backend = redisBackend('redis', respTransport(nativeUrl));
+    return onServerless ? serverlessResilient(backend, 'redis') : backend;
+  }
   if (hasHttp) return redisBackend('kv', httpTransport(httpUrl, httpToken));
 
   /* On serverless the disk is read-only, so the file backend can't run

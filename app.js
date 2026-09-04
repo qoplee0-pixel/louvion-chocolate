@@ -188,9 +188,9 @@
   }
 
   /* An open box seen from above, with the real piece count laid out in a
-     real grid — so a 9 and a 64 look as different as they are. Drawn to
+     real grid — so a 6 and a 60 look as different as they are. Drawn to
      match the actual Louvion box: cream lid, gold-lined tray. */
-  var BOX_LAYOUT = { 3: 3, 9: 3, 16: 4, 64: 8 };
+  var BOX_LAYOUT = { 4: 2, 6: 3, 9: 3, 16: 4, 18: 6, 60: 10 };
 
   function boxTones() {
     return CAT.CHOCOLATES.map(function (c) { return c.base; });

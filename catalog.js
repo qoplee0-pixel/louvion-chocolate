@@ -40,13 +40,22 @@
      to keep one currency format) before taking a real order. */
   var BOXES = [
     {
-      id: 'box-3',
-      name: 'The Trio',
-      nameAr: 'علبة ٣ حبات',
-      pieces: 3,
-      price: 300,
+      id: 'box-4',
+      name: 'The Quartet',
+      nameAr: 'علبة ٤ حبات',
+      pieces: 4,
+      price: 400,
       tag: 'A small hello',
-      desc: 'Three pieces in a ribboned sleeve. For a thank-you, or for keeping to yourself.'
+      desc: 'Four pieces in a ribboned sleeve. For a thank-you, or for keeping to yourself.'
+    },
+    {
+      id: 'box-6',
+      name: 'The Half Dozen',
+      nameAr: 'علبة ٦ حبات',
+      pieces: 6,
+      price: 550,
+      tag: 'An easy gift',
+      desc: 'Six pieces, three by two, in a slim gift box.'
     },
     {
       id: 'box-9',
@@ -67,13 +76,22 @@
       desc: 'Sixteen pieces laid in a gold tray and finished with a hand-tied ribbon.'
     },
     {
-      id: 'box-64',
+      id: 'box-18',
+      name: 'The Deluxe',
+      nameAr: 'علبة ١٨ حبة',
+      pieces: 18,
+      price: 1650,
+      tag: 'For sharing',
+      desc: 'Eighteen pieces in a deep tray, ribbon-tied for giving.'
+    },
+    {
+      id: 'box-60',
       name: 'The Grand',
-      nameAr: 'علبة ٦٤ حبة',
-      pieces: 64,
-      price: 5500,
+      nameAr: 'علبة ٦٠ حبة',
+      pieces: 60,
+      price: 5200,
       tag: 'Celebrations',
-      desc: 'Four trays, sixty-four pieces. Weddings, offices, and occasions that matter.'
+      desc: 'Sixty pieces, tray upon tray. Weddings, offices, and occasions that matter.'
     }
   ];
 

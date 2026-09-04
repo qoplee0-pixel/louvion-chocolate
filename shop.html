@@ -71,13 +71,32 @@
       </div>
 
       <div class="builder">
-        <div class="choc-grid" id="chocPicker"></div>
+        <div class="builder__stage">
+          <!-- The box itself: each cavity is a slot you fill by tapping. -->
+          <div class="slot-tray" id="slotTray" role="group" aria-label="The slots in your box"></div>
+
+          <!-- Pick a chocolate here, then tap the slots to place it. -->
+          <p class="palette-lead" id="paletteLead">Pick a chocolate, then tap a slot to place it. Tap a filled slot to empty it.</p>
+          <div class="palette" id="palette" role="group" aria-label="Chocolates to choose from"></div>
+
+          <div class="builder__tools">
+            <button class="btn btn--ghost" type="button" data-action="fill-rest" id="fillRestBtn">
+              Fill empty slots
+            </button>
+            <button class="btn btn--ghost" type="button" data-action="surprise" id="surpriseBtn">
+              Surprise me
+            </button>
+            <button class="text-btn" type="button" data-action="clear-picks" id="clearBtn" hidden>
+              Empty the box
+            </button>
+          </div>
+        </div>
 
         <aside class="builder__panel" aria-label="Your box so far">
           <h3 class="builder__panel-title" id="panelTitle">Your box</h3>
 
           <div class="progress-label">
-            <span id="progressCount"><strong>0</strong> of 0 chosen</span>
+            <span id="progressCount"><strong>0</strong> of 0 filled</span>
           </div>
           <div class="progress">
             <div class="progress__fill" id="progressFill"></div>
@@ -98,16 +117,10 @@
             <button class="btn btn--full" type="button" data-action="add-to-cart" id="addToCartBtn" disabled>
               Choose your pieces
             </button>
-            <button class="btn btn--ghost btn--full" type="button" data-action="fill-rest" id="fillRestBtn">
-              Fill the rest — chef's choice
-            </button>
-            <button class="text-btn" type="button" data-action="clear-picks" id="clearBtn" hidden>
-              Start this box again
-            </button>
           </div>
 
           <p class="hint">
-            A box has to be exactly full before it can go in your basket —
+            Every slot has to be filled before the box can go in your basket —
             that way nothing arrives half empty.
           </p>
         </aside>

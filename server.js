@@ -371,44 +371,70 @@ function priceOrder(rawItems) {
       throw Object.assign(new Error('Invalid box quantity.'), { status: 400 });
     }
 
-    if (!Array.isArray(raw.chocolates) || raw.chocolates.length === 0) {
-      throw Object.assign(new Error('Every box needs to be filled.'), { status: 400 });
-    }
+    /* Two ways to describe a full box, both rebuilt and re-priced here so
+       nothing the client says about money or capacity is trusted:
+         • slots  — one chocolate id per cavity (positional, the shop's way)
+         • chocolates — per-chocolate counts (older baskets, still accepted)
+       Either must add up to exactly box.pieces. */
+    let picked;          // [{ id, name, qty }] counts, in catalogue order
+    let slots = null;    // [{ id, name }] one per cavity, when the client sent positions
 
-    const picked = [];
-    const seen = new Set();
-    let pieces = 0;
-
-    for (const entry of raw.chocolates) {
-      if (!entry || typeof entry !== 'object') {
-        throw Object.assign(new Error('Malformed box contents.'), { status: 400 });
+    if (Array.isArray(raw.slots)) {
+      if (raw.slots.length !== box.pieces) {
+        throw Object.assign(
+          new Error(`${box.name} holds exactly ${box.pieces} pieces — you filled ${raw.slots.length}.`),
+          { status: 400 }
+        );
       }
-      const choc = CATALOG.chocolateById(String(entry.id || ''));
-      if (!choc) throw Object.assign(new Error('Unknown chocolate in a box.'), { status: 400 });
-      if (seen.has(choc.id)) {
-        throw Object.assign(new Error('Duplicate chocolate in a box.'), { status: 400 });
+      slots = [];
+      const counts = new Map();
+      for (const entry of raw.slots) {
+        const choc = CATALOG.chocolateById(String(entry));
+        if (!choc) throw Object.assign(new Error('Unknown chocolate in a box.'), { status: 400 });
+        slots.push({ id: choc.id, name: choc.name });
+        const seen = counts.get(choc.id);
+        if (seen) seen.qty += 1;
+        else counts.set(choc.id, { id: choc.id, name: choc.name, qty: 1 });
       }
-      seen.add(choc.id);
-
-      const n = Number(entry.qty);
-      if (!Number.isInteger(n) || n < 1 || n > box.pieces) {
-        throw Object.assign(new Error('Invalid chocolate quantity.'), { status: 400 });
+      picked = CATALOG.CHOCOLATES.filter((c) => counts.has(c.id)).map((c) => counts.get(c.id));
+    } else {
+      if (!Array.isArray(raw.chocolates) || raw.chocolates.length === 0) {
+        throw Object.assign(new Error('Every box needs to be filled.'), { status: 400 });
       }
-      pieces += n;
-      picked.push({ id: choc.id, name: choc.name, qty: n });
-    }
+      picked = [];
+      const seen = new Set();
+      let pieces = 0;
+      for (const entry of raw.chocolates) {
+        if (!entry || typeof entry !== 'object') {
+          throw Object.assign(new Error('Malformed box contents.'), { status: 400 });
+        }
+        const choc = CATALOG.chocolateById(String(entry.id || ''));
+        if (!choc) throw Object.assign(new Error('Unknown chocolate in a box.'), { status: 400 });
+        if (seen.has(choc.id)) {
+          throw Object.assign(new Error('Duplicate chocolate in a box.'), { status: 400 });
+        }
+        seen.add(choc.id);
 
-    /* The rule that makes a box a box. */
-    if (pieces !== box.pieces) {
-      throw Object.assign(
-        new Error(`${box.name} holds exactly ${box.pieces} pieces — you chose ${pieces}.`),
-        { status: 400 }
-      );
+        const n = Number(entry.qty);
+        if (!Number.isInteger(n) || n < 1 || n > box.pieces) {
+          throw Object.assign(new Error('Invalid chocolate quantity.'), { status: 400 });
+        }
+        pieces += n;
+        picked.push({ id: choc.id, name: choc.name, qty: n });
+      }
+
+      /* The rule that makes a box a box. */
+      if (pieces !== box.pieces) {
+        throw Object.assign(
+          new Error(`${box.name} holds exactly ${box.pieces} pieces — you chose ${pieces}.`),
+          { status: 400 }
+        );
+      }
     }
 
     const lineTotal = box.price * qty;
     subtotal += lineTotal;
-    lines.push({
+    const line = {
       boxId: box.id,
       boxName: box.name,
       pieces: box.pieces,
@@ -416,7 +442,9 @@ function priceOrder(rawItems) {
       qty,
       lineTotal,
       chocolates: picked
-    });
+    };
+    if (slots) line.slots = slots;
+    lines.push(line);
   }
 
   const shipping = subtotal >= FREE_SHIPPING_OVER_CENTS ? 0 : SHIPPING_CENTS;

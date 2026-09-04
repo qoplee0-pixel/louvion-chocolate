@@ -27,8 +27,10 @@
   var CART_KEY = 'lv-cart';
 
   var session = { user: null, csrfToken: null };
-  var cart = [];                       /* [{ boxId, qty, chocolates:[{id,qty}] }] */
-  var builder = { boxId: null, picks: {} };  /* picks: { chocolateId: qty } */
+  var cart = [];            /* [{ boxId, qty, slots:[chocId…], chocolates:[{id,qty}] }] */
+  /* slots: one entry per cavity in the box, each a chocolateId or null.
+     active: the chocolate currently selected to place. */
+  var builder = { boxId: null, slots: [], active: null };
   var adminData = { orders: [], stats: null, filter: 'all', query: '' };
   var drawerMode = 'cart';             /* 'cart' | 'checkout' | 'done' */
   var lastOrder = null;
@@ -123,10 +125,15 @@
 
   var DOME = 'M17 73 C17 38 30 21 50 21 C70 21 83 38 83 73 Z';
 
+  /* The one place a chocolate's photo path is built, so every photo — card,
+     hero, palette, slot — resolves the same way (and the standalone preview
+     can swap them all for inline data URIs by rewriting just this). */
+  function photoSrc(c) { return 'assets/chocolates/' + esc(c.id) + '.jpg'; }
+
   /* Real product photo for a chocolate, cropped square in assets/chocolates/.
      Kept a plain <img> under the strict CSP (img-src 'self'). */
   function chocImg(c) {
-    return '<img class="choc-photo" src="assets/chocolates/' + esc(c.id) + '.jpg" alt="' +
+    return '<img class="choc-photo" src="' + photoSrc(c) + '" alt="' +
       esc(c.name) + '" loading="lazy" width="600" height="600" />';
   }
 
@@ -299,6 +306,17 @@
         if (!line || typeof line !== 'object') return false;
         var box = CAT.boxById(line.boxId);
         if (!box) return false;
+        if (!(Number.isInteger(line.qty) && line.qty >= 1 && line.qty <= 20)) return false;
+
+        /* New format: one slot per cavity, every slot a real chocolate. */
+        if (Array.isArray(line.slots)) {
+          if (line.slots.length !== box.pieces) return false;
+          if (!line.slots.every(function (id) { return CAT.chocolateById(id); })) return false;
+          if (!Array.isArray(line.chocolates)) line.chocolates = countsFromSlots(line.slots);
+          return true;
+        }
+
+        /* Old format: per-chocolate counts summing to the box size. */
         if (!Array.isArray(line.chocolates) || !line.chocolates.length) return false;
         var total = 0;
         for (var i = 0; i < line.chocolates.length; i++) {
@@ -307,8 +325,7 @@
           if (!Number.isInteger(entry.qty) || entry.qty < 1) return false;
           total += entry.qty;
         }
-        if (total !== box.pieces) return false;
-        return Number.isInteger(line.qty) && line.qty >= 1 && line.qty <= 20;
+        return total === box.pieces;
       });
     } catch (err) {
       cart = [];
@@ -551,51 +568,69 @@
   /* ═══ SHOP ═══ */
 
   function pickedTotal() {
-    return Object.keys(builder.picks).reduce(function (n, id) { return n + builder.picks[id]; }, 0);
+    return builder.slots.reduce(function (n, id) { return id ? n + 1 : n; }, 0);
   }
+
+  /* Roll a slot array up into per-chocolate counts, in catalogue order, for
+     the summary panel, the cart line, and re-validating a stored basket. */
+  function countsFromSlots(slots) {
+    var counts = {};
+    slots.forEach(function (id) { if (id) counts[id] = (counts[id] || 0) + 1; });
+    return CAT.CHOCOLATES
+      .filter(function (c) { return counts[c.id]; })
+      .map(function (c) { return { id: c.id, qty: counts[c.id] }; });
+  }
+  function slotCounts() { return countsFromSlots(builder.slots); }
 
   function selectBox(boxId) {
     var box = CAT.boxById(boxId);
     if (!box) return;
-    if (builder.boxId !== boxId) builder.picks = {};
+    /* A new size means a fresh, empty tray of the right length. */
+    if (builder.boxId !== boxId) {
+      builder.slots = new Array(box.pieces).fill(null);
+    }
     builder.boxId = boxId;
+    if (!builder.active) builder.active = CAT.CHOCOLATES[0].id;
     renderShop();
     var fill = $('#stepFill');
     if (fill) fill.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function adjustPick(chocId, delta) {
-    var box = CAT.boxById(builder.boxId);
-    if (!box || !CAT.chocolateById(chocId)) return;
-    var current = builder.picks[chocId] || 0;
-    var next = current + delta;
-    if (next < 0) next = 0;
-    if (delta > 0 && pickedTotal() >= box.pieces) {
-      toast('That box is already full at ' + pluralPieces(box.pieces));
-      return;
-    }
-    if (next === 0) delete builder.picks[chocId];
-    else builder.picks[chocId] = next;
+  /* Choose which chocolate the next tap will place. */
+  function setActive(chocId) {
+    if (!CAT.chocolateById(chocId)) return;
+    builder.active = chocId;
     renderShop();
   }
 
-  /* Round out a part-filled box evenly across what's already chosen —
-     or across the whole collection if nothing is. */
+  /* Tap a slot: place the active chocolate, or empty it if it already holds
+     the active one (tap-again-to-clear). A different chocolate replaces. */
+  function paintSlot(index) {
+    var box = CAT.boxById(builder.boxId);
+    if (!box || index < 0 || index >= builder.slots.length) return;
+    if (!builder.active) { toast('Pick a chocolate first'); return; }
+    builder.slots[index] = builder.slots[index] === builder.active ? null : builder.active;
+    renderShop();
+  }
+
+  /* Fill every empty slot with the active chocolate. */
   function fillRemaining() {
     var box = CAT.boxById(builder.boxId);
+    if (!box || !builder.active) return;
+    for (var i = 0; i < builder.slots.length; i++) {
+      if (!builder.slots[i]) builder.slots[i] = builder.active;
+    }
+    renderShop();
+  }
+
+  /* Chef's choice: fill the empty slots evenly across the whole collection. */
+  function surpriseFill() {
+    var box = CAT.boxById(builder.boxId);
     if (!box) return;
-    var remaining = box.pieces - pickedTotal();
-    if (remaining <= 0) return;
-
-    var pool = Object.keys(builder.picks);
-    if (!pool.length) pool = CAT.CHOCOLATES.map(function (c) { return c.id; });
-
+    var pool = CAT.CHOCOLATES.map(function (c) { return c.id; });
     var i = 0;
-    while (remaining > 0) {
-      var id = pool[i % pool.length];
-      builder.picks[id] = (builder.picks[id] || 0) + 1;
-      remaining--;
-      i++;
+    for (var s = 0; s < builder.slots.length; s++) {
+      if (!builder.slots[s]) { builder.slots[s] = pool[i % pool.length]; i++; }
     }
     renderShop();
   }
@@ -604,30 +639,25 @@
     var box = CAT.boxById(builder.boxId);
     if (!box) return;
     if (pickedTotal() !== box.pieces) {
-      toast('Choose exactly ' + pluralPieces(box.pieces) + ' first', 'bad');
+      toast('Fill all ' + pluralPieces(box.pieces) + ' first', 'bad');
       return;
     }
 
-    var chocolates = Object.keys(builder.picks).map(function (id) {
-      return { id: id, qty: builder.picks[id] };
-    });
+    var slots = builder.slots.slice();
+    var chocolates = slotCounts();
 
-    /* Same box, same contents → bump the quantity rather than repeat it. */
-    var signature = JSON.stringify(chocolates.slice().sort(function (a, b) {
-      return a.id < b.id ? -1 : 1;
-    }));
+    /* Same box, same slots (same chocolate in the same place) → bump the
+       quantity rather than repeat the line. */
+    var signature = JSON.stringify(slots);
     var existing = cart.find(function (line) {
-      if (line.boxId !== box.id) return false;
-      return JSON.stringify(line.chocolates.slice().sort(function (a, b) {
-        return a.id < b.id ? -1 : 1;
-      })) === signature;
+      return line.boxId === box.id && JSON.stringify(line.slots || []) === signature;
     });
 
     if (existing) existing.qty += 1;
-    else cart.push({ boxId: box.id, qty: 1, chocolates: chocolates });
+    else cart.push({ boxId: box.id, qty: 1, slots: slots, chocolates: chocolates });
 
     saveCart();
-    builder.picks = {};
+    builder.slots = new Array(box.pieces).fill(null);
     renderShop();
     toast(box.name + ' added to your box', 'ok');
     openDrawer('cart');
@@ -665,28 +695,44 @@
     var note = $('#fillNote');
     if (note) {
       note.textContent = remaining > 0
-        ? remaining + ' more to choose'
+        ? remaining + (remaining === 1 ? ' slot left' : ' slots left')
         : 'Box full — ready to add';
     }
 
-    var picker = $('#chocPicker');
-    if (picker) {
-      picker.innerHTML = CAT.CHOCOLATES.map(function (c) {
-        var qty = builder.picks[c.id] || 0;
-        return '<div class="picker-card' + (qty ? ' is-picked' : '') + '">' +
-          '<div class="picker-card__photo">' + chocImg(c) + '</div>' +
-          '<h3 class="picker-card__name">' + esc(c.name) + '</h3>' +
-          '<div class="picker-card__ar" dir="rtl" lang="ar">' + esc(c.nameAr) + '</div>' +
-          '<p class="picker-card__desc">' + esc(c.desc) + '</p>' +
-          '<div class="stepper">' +
-          '<button class="stepper__btn" type="button" data-action="choc-dec" data-choc-id="' +
-          esc(c.id) + '" aria-label="One fewer ' + esc(c.name) + '"' + (qty ? '' : ' disabled') + '>–</button>' +
-          '<span class="stepper__value">' + qty + '</span>' +
-          '<button class="stepper__btn" type="button" data-action="choc-inc" data-choc-id="' +
-          esc(c.id) + '" aria-label="One more ' + esc(c.name) + '"' +
-          (remaining <= 0 ? ' disabled' : '') + '>+</button>' +
-          '</div></div>';
+    /* The box itself: one tappable cavity per slot, in the box's own grid. */
+    var slotTray = $('#slotTray');
+    if (slotTray) {
+      slotTray.style.setProperty('--cols', BOX_LAYOUT[box.pieces] || Math.ceil(Math.sqrt(box.pieces)));
+      slotTray.innerHTML = builder.slots.map(function (id, i) {
+        if (id) {
+          var c = CAT.chocolateById(id);
+          return '<button class="slot is-filled" type="button" data-action="paint-slot" data-slot="' + i +
+            '" title="' + esc(c.name) + '" aria-label="Slot ' + (i + 1) + ': ' + esc(c.name) + ', tap to empty">' +
+            '<img class="slot__img" src="' + photoSrc(c) + '" alt="" loading="lazy" /></button>';
+        }
+        return '<button class="slot" type="button" data-action="paint-slot" data-slot="' + i +
+          '" aria-label="Slot ' + (i + 1) + ' empty, tap to fill"><span class="slot__plus" aria-hidden="true">+</span></button>';
       }).join('');
+    }
+
+    /* The palette: tap one to make it the chocolate the next slot gets. */
+    var palette = $('#palette');
+    if (palette) {
+      palette.innerHTML = CAT.CHOCOLATES.map(function (c) {
+        return '<button class="palette__chip' + (builder.active === c.id ? ' is-active' : '') +
+          '" type="button" data-action="pick-choc" data-choc-id="' + esc(c.id) +
+          '" aria-pressed="' + (builder.active === c.id) + '">' +
+          '<img class="palette__img" src="' + photoSrc(c) + '" alt="" loading="lazy" />' +
+          '<span class="palette__name">' + esc(c.name) + '</span></button>';
+      }).join('');
+    }
+
+    var lead = $('#paletteLead');
+    if (lead) {
+      var active = builder.active && CAT.chocolateById(builder.active);
+      lead.innerHTML = active
+        ? 'Placing <strong>' + esc(active.name) + '</strong> — tap a slot. Tap a filled slot to empty it.'
+        : 'Pick a chocolate, then tap a slot to place it.';
     }
 
     var panelTitle = $('#panelTitle');
@@ -696,27 +742,26 @@
     if (fillBar) fillBar.style.setProperty('--fill', Math.round((total / box.pieces) * 100) + '%');
 
     var counter = $('#progressCount');
-    if (counter) counter.innerHTML = '<strong>' + total + '</strong> of ' + box.pieces + ' chosen';
+    if (counter) counter.innerHTML = '<strong>' + total + '</strong> of ' + box.pieces + ' filled';
 
     var tray = $('#tray');
     if (tray) {
-      var ids = Object.keys(builder.picks);
-      tray.innerHTML = ids.length
-        ? ids.map(function (id) {
-            var c = CAT.chocolateById(id);
-            var swatchId = 'sw-' + id;
+      var counts = slotCounts();
+      tray.innerHTML = counts.length
+        ? counts.map(function (entry) {
+            var c = CAT.chocolateById(entry.id);
             return '<div class="tray__row">' +
-              '<span class="tray__swatch" id="' + esc(swatchId) + '"></span>' +
+              '<span class="tray__swatch" id="sw-' + esc(entry.id) + '"></span>' +
               '<span class="tray__name">' + esc(c.name) + '</span>' +
-              '<span class="tray__qty">×' + builder.picks[id] + '</span>' +
+              '<span class="tray__qty">×' + entry.qty + '</span>' +
               '</div>';
           }).join('')
-        : '<p class="tray__empty">Nothing chosen yet — tap + on any piece.</p>';
+        : '<p class="tray__empty">Nothing placed yet — pick a chocolate, then tap a slot.</p>';
 
       /* CSP forbids style="" in markup, so paint the swatches afterwards. */
-      ids.forEach(function (id) {
-        var swatch = document.getElementById('sw-' + id);
-        var c = CAT.chocolateById(id);
+      counts.forEach(function (entry) {
+        var swatch = document.getElementById('sw-' + entry.id);
+        var c = CAT.chocolateById(entry.id);
         if (swatch && c) swatch.style.setProperty('background', c.base);
       });
     }
@@ -732,14 +777,14 @@
       addBtn.disabled = remaining !== 0;
       addBtn.textContent = remaining === 0
         ? 'Add to your box · ' + money(box.price)
-        : 'Choose ' + remaining + ' more';
+        : 'Fill ' + remaining + ' more';
     }
 
     var fillBtn = $('#fillRestBtn');
-    if (fillBtn) {
-      fillBtn.hidden = remaining <= 0;
-      fillBtn.textContent = "Fill the rest — chef's choice";
-    }
+    if (fillBtn) fillBtn.hidden = remaining <= 0;
+
+    var surpriseBtn = $('#surpriseBtn');
+    if (surpriseBtn) surpriseBtn.hidden = remaining <= 0;
 
     var clearBtn = $('#clearBtn');
     if (clearBtn) clearBtn.hidden = total === 0;
@@ -748,7 +793,12 @@
   function initShop() {
     var params = new URLSearchParams(window.location.search);
     var wanted = params.get('box');
-    if (wanted && CAT.boxById(wanted)) builder.boxId = wanted;
+    var box = wanted && CAT.boxById(wanted);
+    if (box) {
+      builder.boxId = box.id;
+      builder.slots = new Array(box.pieces).fill(null);
+    }
+    if (!builder.active) builder.active = CAT.CHOCOLATES[0].id;
     renderShop();
     if (params.get('checkout') === '1' && cart.length && session.user) openDrawer('checkout');
   }
@@ -857,6 +907,7 @@
         pluralPieces(line.pieces) + (line.qty > 1 ? ' × ' + line.qty : '') + '</span>' +
         '<span class="order-line__price">' + esc(money(line.lineTotal)) + '</span>' +
         '<span class="order-line__chocs">' + chocs + '</span>' +
+        slotMapHTML(line) +
         '</div>';
     }).join('');
 
@@ -904,6 +955,7 @@
         : '<div class="empty-state"><div class="empty-state__title">No orders yet</div>' +
           '<p class="empty-state__text">When you order a box it will appear here.</p>' +
           '<p class="empty-state__text"><a class="link-quiet" href="shop.html">Browse the boxes</a></p></div>';
+      paintSlotmaps(list);
     } catch (err) {
       list.innerHTML = '<div class="form-error">' + esc(err.message) + '</div>';
     }
@@ -933,6 +985,29 @@
       order.recipient.toLowerCase().indexOf(q) >= 0;
   }
 
+  /* A compact picture of a filled box for the studio: one dot per slot, laid
+     out in the box's own grid, so the chocolatier can see exactly what goes
+     where. Empty for older orders that were placed by counts, not slots. */
+  function slotMapHTML(line) {
+    if (!Array.isArray(line.slots) || !line.slots.length) return '';
+    var cols = BOX_LAYOUT[line.pieces] || Math.ceil(Math.sqrt(line.pieces));
+    var dots = line.slots.map(function (s, i) {
+      var id = s && s.id ? s.id : s;
+      var c = CAT.chocolateById(id);
+      var name = c ? c.name : String(id);
+      return '<span class="slotmap__dot" title="Slot ' + (i + 1) + ': ' + esc(name) + '">' +
+        (c ? '<img src="' + photoSrc(c) + '" alt="" loading="lazy" />' : '') + '</span>';
+    }).join('');
+    return '<div class="slotmap" data-cols="' + cols + '">' + dots + '</div>';
+  }
+
+  /* CSP forbids style="" in markup, so set each map's column count after. */
+  function paintSlotmaps(root) {
+    (root || document).querySelectorAll('.slotmap').forEach(function (el) {
+      el.style.setProperty('--cols', el.dataset.cols);
+    });
+  }
+
   function renderAdmin() {
     var stats = adminData.stats;
     if (stats) {
@@ -956,7 +1031,8 @@
       var contents = order.items.map(function (line) {
         return '<b>' + esc(line.boxName) + ' (' + line.pieces + ')' +
           (line.qty > 1 ? ' × ' + line.qty : '') + '</b><br>' +
-          esc(line.chocolates.map(function (e) { return e.name + ' ×' + e.qty; }).join(', '));
+          esc(line.chocolates.map(function (e) { return e.name + ' ×' + e.qty; }).join(', ')) +
+          slotMapHTML(line);
       }).join('<br><br>');
 
       var options = CAT.ORDER_STATUSES.map(function (s) {
@@ -980,6 +1056,8 @@
         '" aria-label="Status for order ' + esc(order.id) + '">' + options + '</select></td>' +
         '</tr>';
     }).join('');
+
+    paintSlotmaps(body);
   }
 
   async function loadAdmin() {
@@ -1066,10 +1144,15 @@
       else if (action === 'close-cart') { event.preventDefault(); closeDrawer(); }
       else if (action === 'back-to-cart') { event.preventDefault(); openDrawer('cart'); }
       else if (action === 'select-box') selectBox(trigger.dataset.boxId);
-      else if (action === 'choc-inc') adjustPick(trigger.dataset.chocId, 1);
-      else if (action === 'choc-dec') adjustPick(trigger.dataset.chocId, -1);
+      else if (action === 'pick-choc') setActive(trigger.dataset.chocId);
+      else if (action === 'paint-slot') paintSlot(Number(trigger.dataset.slot));
       else if (action === 'fill-rest') fillRemaining();
-      else if (action === 'clear-picks') { builder.picks = {}; renderShop(); }
+      else if (action === 'surprise') surpriseFill();
+      else if (action === 'clear-picks') {
+        var b = CAT.boxById(builder.boxId);
+        if (b) builder.slots = new Array(b.pieces).fill(null);
+        renderShop();
+      }
       else if (action === 'add-to-cart') addBuilderToCart();
       else if (action === 'remove-line') {
         cart.splice(Number(trigger.dataset.index), 1);

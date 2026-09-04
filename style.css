@@ -547,14 +547,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
   line-height: 1.6;
 }
 
-.picker-card__ar {
-  font-size: 13px;
-  color: var(--gold);
-  line-height: 1.7;
-  margin-top: 2px;
-  padding-inline: 12px;
-}
-
 .choc-card__desc {
   font-size: 13px;
   color: var(--text-soft);
@@ -564,74 +556,95 @@ button { font: inherit; color: inherit; cursor: pointer; }
   flex: 1;
 }
 
-/* ═══ PICKER (shop) ═══ */
-.picker-card {
+/* ═══ SLOT BUILDER (shop) ═══
+   The box is a tray of cavities; you pick a chocolate from the palette and
+   tap a slot to place it. Photos are plain <img> under the strict CSP. */
+.builder__stage { display: flex; flex-direction: column; gap: 24px; }
+
+.slot-tray {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+  padding: 20px;
+  background: var(--cream-deep);
+  border: 1px solid var(--line-firm);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 2px 12px rgba(46, 28, 18, .09);
+}
+
+.slot {
   position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 2px dashed var(--cocoa-100);
+  border-radius: 50%;
+  background: var(--paper);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition),
+              transform var(--transition);
+}
+.slot:hover { border-color: var(--gold); transform: scale(1.06); }
+.slot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.slot__plus { font-size: 18px; line-height: 1; color: var(--cocoa-100); }
+.slot.is-filled { border-style: solid; border-color: var(--line); }
+.slot.is-filled:hover { box-shadow: 0 0 0 2px var(--gold); }
+.slot__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.palette-lead { font-size: 13px; color: var(--text-soft); margin: 0; }
+.palette-lead strong { color: var(--cocoa-900); font-weight: 600; }
+
+.palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+  gap: 10px;
+}
+
+.palette__chip {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 6px;
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  text-align: center;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-.picker-card.is-picked { border-color: var(--cocoa-900); box-shadow: 0 0 0 2px var(--cocoa-900); }
-
-.picker-card__photo {
-  aspect-ratio: 1 / 1;
-  background: var(--cream-deep);
-  border-bottom: 1px solid var(--line);
-  overflow: hidden;
-}
-
-.picker-card__name {
-  font-family: var(--serif);
-  font-size: 15px;
-  line-height: 1.3;
-  color: var(--cocoa-900);
-  margin-top: 12px;
-  padding-inline: 12px;
-}
-
-.picker-card__desc {
-  font-size: 12px;
-  color: var(--text-mute);
-  line-height: 1.5;
-  margin-top: 4px;
-  padding-inline: 12px;
-  flex: 1;
-}
-
-.stepper {
-  margin: 12px;
-  display: grid;
-  grid-template-columns: 34px 1fr 34px;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--line-firm);
   border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.stepper__btn {
-  height: 34px;
-  background: var(--cream);
-  border: 0;
-  font-size: 17px;
-  line-height: 1;
-  color: var(--cocoa-700);
-  transition: background var(--transition);
-}
-.stepper__btn:hover:not(:disabled) { background: var(--cream-deep); }
-.stepper__btn:disabled { color: var(--cocoa-100); cursor: not-allowed; }
-
-.stepper__value {
-  font-family: var(--serif);
-  font-size: 17px;
-  color: var(--cocoa-900);
   text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition),
+              transform var(--transition);
 }
+.palette__chip:hover { border-color: var(--cocoa-300); transform: translateY(-2px); }
+.palette__chip.is-active { border-color: var(--cocoa-900); box-shadow: 0 0 0 2px var(--cocoa-900); }
+.palette__chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.palette__img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; display: block; }
+.palette__name { font-size: 11.5px; line-height: 1.3; color: var(--cocoa-700); }
+
+.builder__tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.builder__tools .btn { width: auto; }
+
+/* Slot map — a filled box in miniature, shown in the studio and a
+   customer's order history so the arrangement is visible at a glance. */
+.slotmap {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  gap: 3px;
+  width: max-content;
+  max-width: 168px;
+  margin-top: 9px;
+}
+.slotmap__dot {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--cream-deep);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.slotmap__dot img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ═══ BUILDER BAR ═══ */
 .builder {

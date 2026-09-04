@@ -363,13 +363,23 @@ function priceOrder(rawItems) {
     if (!raw || typeof raw !== 'object') {
       throw Object.assign(new Error('Malformed basket.'), { status: 400 });
     }
-    const box = CATALOG.boxById(String(raw.boxId || ''));
-    if (!box) throw Object.assign(new Error('Unknown box in basket.'), { status: 400 });
-
     const qty = Number(raw.qty);
     if (!Number.isInteger(qty) || qty < 1 || qty > MAX_QTY_PER_LINE) {
-      throw Object.assign(new Error('Invalid box quantity.'), { status: 400 });
+      throw Object.assign(new Error('Invalid quantity.'), { status: 400 });
     }
+
+    /* A Belgian bar — a solid bar bought by the unit, with no filling. */
+    if (raw.barId) {
+      const bar = CATALOG.barById(String(raw.barId));
+      if (!bar) throw Object.assign(new Error('Unknown item in basket.'), { status: 400 });
+      const barTotal = bar.price * qty;
+      subtotal += barTotal;
+      lines.push({ kind: 'bar', barId: bar.id, barName: bar.name, unitPrice: bar.price, qty, lineTotal: barTotal });
+      continue;
+    }
+
+    const box = CATALOG.boxById(String(raw.boxId || ''));
+    if (!box) throw Object.assign(new Error('Unknown box in basket.'), { status: 400 });
 
     /* Two ways to describe a full box, both rebuilt and re-priced here so
        nothing the client says about money or capacity is trusted:
@@ -435,6 +445,7 @@ function priceOrder(rawItems) {
     const lineTotal = box.price * qty;
     subtotal += lineTotal;
     const line = {
+      kind: 'box',
       boxId: box.id,
       boxName: box.name,
       pieces: box.pieces,
@@ -498,6 +509,7 @@ async function handleApi(req, res, url) {
       currency: CATALOG.CURRENCY,
       boxes: CATALOG.BOXES,
       chocolates: CATALOG.CHOCOLATES,
+      bars: CATALOG.BARS,
       shipping: { flat: SHIPPING_CENTS, freeOver: FREE_SHIPPING_OVER_CENTS }
     });
   }
@@ -679,7 +691,7 @@ async function handleApi(req, res, url) {
     for (const o of orders) {
       if (Object.prototype.hasOwnProperty.call(counts, o.status)) counts[o.status] += 1;
       if (o.status !== 'cancelled') revenue += o.total;
-      for (const line of o.items) pieces += line.pieces * line.qty;
+      for (const line of o.items) pieces += (line.pieces || 0) * line.qty;
     }
 
     return sendJson(res, 200, {

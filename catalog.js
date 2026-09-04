@@ -197,6 +197,36 @@
     }
   ];
 
+  /* ═══ BARS ═══
+     Solid Belgian bars, sold by the unit — not filled like a box. Their
+     photos live in assets/chocolates/<id>.jpg, same as the bonbons.
+
+     ⚠ PRICES ARE PLACEHOLDERS (integer hundredths) — set Louvion's real
+     bar prices before taking orders. */
+  var BARS = [
+    {
+      id: 'bar-dark',
+      name: 'Belgian Dark',
+      nameAr: 'شوكولاتة بلجيكية داكنة',
+      price: 250,
+      desc: 'Belgian dark chocolate, deep and clean.'
+    },
+    {
+      id: 'bar-milk',
+      name: 'Belgian Milk',
+      nameAr: 'شوكولاتة بلجيكية بالحليب',
+      price: 250,
+      desc: 'Smooth Belgian milk chocolate.'
+    },
+    {
+      id: 'bar-plain',
+      name: 'House Blend',
+      nameAr: 'شوكولاتة بلجيكية',
+      price: 200,
+      desc: 'Our everyday Belgian bar.'
+    }
+  ];
+
   /* ═══ DELIVERY ═══
      Shared so the basket total the customer sees and the total the
      server charges can never disagree. Also a placeholder — set these
@@ -214,6 +244,10 @@
     for (var i = 0; i < CHOCOLATES.length; i++) if (CHOCOLATES[i].id === id) return CHOCOLATES[i];
     return null;
   }
+  function barById(id) {
+    for (var i = 0; i < BARS.length; i++) if (BARS[i].id === id) return BARS[i];
+    return null;
+  }
 
   /* Prices are integer hundredths everywhere. Only formatted for display. */
   function formatPrice(cents) {
@@ -225,10 +259,12 @@
     CURRENCY: CURRENCY,
     BOXES: BOXES,
     CHOCOLATES: CHOCOLATES,
+    BARS: BARS,
     SHIPPING: SHIPPING,
     ORDER_STATUSES: ORDER_STATUSES,
     boxById: boxById,
     chocolateById: chocolateById,
+    barById: barById,
     formatPrice: formatPrice
   };
 });

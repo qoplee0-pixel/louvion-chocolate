@@ -137,6 +137,12 @@
       esc(c.name) + '" loading="lazy" width="600" height="600" />';
   }
 
+  /* Small square thumbnail — used for a bar in the basket. */
+  function barImg(bar) {
+    return '<img class="thumb-photo" src="' + photoSrc(bar) + '" alt="' +
+      esc(bar.name) + '" loading="lazy" width="120" height="120" />';
+  }
+
   function chocolateSVG(c) {
     var light = shade(c.base, 0.32);
     var dark = shade(c.base, -0.38);
@@ -304,9 +310,13 @@
          it as far as the server. */
       cart = raw.filter(function (line) {
         if (!line || typeof line !== 'object') return false;
+        if (!(Number.isInteger(line.qty) && line.qty >= 1 && line.qty <= 20)) return false;
+
+        /* A Belgian bar — bought by the unit, no box or filling. */
+        if (line.barId) return !!CAT.barById(line.barId);
+
         var box = CAT.boxById(line.boxId);
         if (!box) return false;
-        if (!(Number.isInteger(line.qty) && line.qty >= 1 && line.qty <= 20)) return false;
 
         /* New format: one slot per cavity, every slot a real chocolate. */
         if (Array.isArray(line.slots)) {
@@ -341,11 +351,18 @@
     return cart.reduce(function (n, line) { return n + line.qty; }, 0);
   }
 
+  /* Unit price × quantity for any basket line — a box or a Belgian bar. */
+  function linePrice(line) {
+    if (line.barId) {
+      var bar = CAT.barById(line.barId);
+      return bar ? bar.price * line.qty : 0;
+    }
+    var box = CAT.boxById(line.boxId);
+    return box ? box.price * line.qty : 0;
+  }
+
   function cartSubtotal() {
-    return cart.reduce(function (sum, line) {
-      var box = CAT.boxById(line.boxId);
-      return sum + (box ? box.price * line.qty : 0);
-    }, 0);
+    return cart.reduce(function (sum, line) { return sum + linePrice(line); }, 0);
   }
 
   function cartShipping() {
@@ -452,18 +469,30 @@
       return;
     }
 
-    title.textContent = 'Your box';
+    title.textContent = 'Your basket';
     body.innerHTML = cart.map(function (line, index) {
-      var box = CAT.boxById(line.boxId);
+      var art, name, meta, contents = '';
+      if (line.barId) {
+        var bar = CAT.barById(line.barId);
+        art = '<div class="cart-line__art cart-line__art--photo">' + barImg(bar) + '</div>';
+        name = esc(bar.name);
+        meta = 'Belgian bar · quantity ' + line.qty;
+      } else {
+        var box = CAT.boxById(line.boxId);
+        art = '<div class="cart-line__art">' + boxSVG(box) + '</div>';
+        name = esc(box.name);
+        meta = pluralPieces(box.pieces) + ' · quantity ' + line.qty;
+        contents = '<div class="cart-line__contents">' + esc(describeLine(line)) + '</div>';
+      }
       return '<div class="cart-line">' +
-        '<div class="cart-line__art">' + boxSVG(box) + '</div>' +
+        art +
         '<div>' +
-        '<div class="cart-line__name">' + esc(box.name) + '</div>' +
-        '<div class="cart-line__meta">' + pluralPieces(box.pieces) + ' · quantity ' + line.qty + '</div>' +
-        '<div class="cart-line__contents">' + esc(describeLine(line)) + '</div>' +
+        '<div class="cart-line__name">' + name + '</div>' +
+        '<div class="cart-line__meta">' + meta + '</div>' +
+        contents +
         '</div>' +
         '<div class="cart-line__right">' +
-        '<div class="cart-line__price">' + esc(money(box.price * line.qty)) + '</div>' +
+        '<div class="cart-line__price">' + esc(money(linePrice(line))) + '</div>' +
         '<button class="text-btn" type="button" data-action="remove-line" data-index="' + index + '">Remove</button>' +
         '</div></div>';
     }).join('');
@@ -563,6 +592,33 @@
           '</article>';
       }).join('');
     }
+
+    var bars = $('#homeBars');
+    if (bars) {
+      bars.innerHTML = CAT.BARS.map(function (bar) {
+        return '<article class="choc-card reveal">' +
+          '<div class="choc-card__photo">' + chocImg(bar) + '</div>' +
+          '<h3 class="choc-card__name">' + esc(bar.name) + '</h3>' +
+          '<div class="choc-card__family" dir="rtl" lang="ar">' + esc(bar.nameAr) + '</div>' +
+          '<p class="choc-card__desc">' + esc(bar.desc) + '</p>' +
+          '<div class="bar-card__buy">' +
+          '<span class="bar-card__price">' + esc(money(bar.price)) + '</span>' +
+          '<button class="btn btn--sm" type="button" data-action="add-bar" data-bar-id="' +
+          esc(bar.id) + '">Add to basket</button>' +
+          '</div></article>';
+      }).join('');
+    }
+  }
+
+  function addBarToCart(barId) {
+    var bar = CAT.barById(barId);
+    if (!bar) return;
+    var existing = cart.find(function (line) { return line.barId === bar.id; });
+    if (existing) existing.qty += 1;
+    else cart.push({ barId: bar.id, qty: 1 });
+    saveCart();
+    toast(bar.name + ' added to your basket', 'ok');
+    openDrawer('cart');
   }
 
   /* ═══ SHOP ═══ */
@@ -899,6 +955,14 @@
 
   function orderCardHTML(order) {
     var lines = order.items.map(function (line) {
+      if (line.barId) {
+        return '<div class="order-line">' +
+          '<span class="order-line__name">' + esc(line.barName) +
+          (line.qty > 1 ? ' × ' + line.qty : '') + '</span>' +
+          '<span class="order-line__price">' + esc(money(line.lineTotal)) + '</span>' +
+          '<span class="order-line__chocs">Belgian bar</span>' +
+          '</div>';
+      }
       var chocs = line.chocolates.map(function (entry) {
         return esc(entry.name) + ' ×' + entry.qty;
       }).join(', ');
@@ -1029,6 +1093,10 @@
 
     body.innerHTML = rows.map(function (order) {
       var contents = order.items.map(function (line) {
+        if (line.barId) {
+          return '<b>' + esc(line.barName) + (line.qty > 1 ? ' × ' + line.qty : '') +
+            '</b><br>Belgian bar';
+        }
         return '<b>' + esc(line.boxName) + ' (' + line.pieces + ')' +
           (line.qty > 1 ? ' × ' + line.qty : '') + '</b><br>' +
           esc(line.chocolates.map(function (e) { return e.name + ' ×' + e.qty; }).join(', ')) +
@@ -1154,6 +1222,7 @@
         renderShop();
       }
       else if (action === 'add-to-cart') addBuilderToCart();
+      else if (action === 'add-bar') addBarToCart(trigger.dataset.barId);
       else if (action === 'remove-line') {
         cart.splice(Number(trigger.dataset.index), 1);
         saveCart();
